@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import FeaturesWidget from '@/components/landing/FeaturesWidget.vue';
+import AboutWidget from '@/components/landing/AboutWidget.vue';
+import ClientsWidget from '@/components/landing/ClientsWidget.vue';
 import FooterWidget from '@/components/landing/FooterWidget.vue';
 import HeroWidget from '@/components/landing/HeroWidget.vue';
-import HighlightsWidget from '@/components/landing/HighlightsWidget.vue';
-import PricingWidget from '@/components/landing/PricingWidget.vue';
+import InstituteWidget from '@/components/landing/InstituteWidget.vue';
+import ProductWidget from '@/components/landing/ProductWidget.vue';
+import ServiceWidget from '@/components/landing/ServiceWidget.vue';
 import TopbarWidget from '@/components/landing/TopbarWidget.vue';
+import VisionCarousel from '@/components/landing/VisionCarousel.vue';
 </script>
 
 <template>
@@ -14,9 +17,20 @@ import TopbarWidget from '@/components/landing/TopbarWidget.vue';
                 <TopbarWidget />
             </div>
             <HeroWidget />
-            <FeaturesWidget />
-            <HighlightsWidget />
-            <PricingWidget />
+            <VisionCarousel
+                :slides="[
+                    { title: 'OUR VISION', description: 'To strive to be the most creative and reliable supplier in providing solutions & services and laboratory needs products & services to sustain quality of pathology service, education and research activity', image: '/images/slide/slider1.png', link: '#' },
+                    { title: 'OUR MISSION', description: 'To deliver precise, accurate and effective solution to customers to fulfill requirements and optimize their objective and aims', image: '/images/slide/slider2.png', link: '#' },
+                    { title: 'OUR VALUES', description: 'Providing Accurate & Precise support all the time', image: '/images/slide/slider3.png', link: '#' }
+                ]"
+                :autoplayMs="7000"
+            />
+            <ServiceWidget />
+            <ProductWidget />
+            <ClientsWidget />
+            <InstituteWidget />
+            <AboutWidget />
+            <ContactWidget />
             <FooterWidget />
         </div>
     </div>

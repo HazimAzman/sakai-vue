@@ -6,101 +6,105 @@ const router = createRouter({
     routes: [
         {
             path: '/',
+            redirect: '/landing'
+        },
+        {
+            path: '/dashboard',
             component: AppLayout,
             children: [
                 {
-                    path: '/',
+                    path: '/dashboard',
                     name: 'dashboard',
                     component: () => import('@/views/Dashboard.vue')
                 },
                 {
-                    path: '/uikit/formlayout',
+                    path: '/dashboard/uikit/formlayout',
                     name: 'formlayout',
                     component: () => import('@/views/uikit/FormLayout.vue')
                 },
                 {
-                    path: '/uikit/input',
+                    path: '/dashboard/uikit/input',
                     name: 'input',
                     component: () => import('@/views/uikit/InputDoc.vue')
                 },
                 {
-                    path: '/uikit/button',
+                    path: '/dashboard/uikit/button',
                     name: 'button',
                     component: () => import('@/views/uikit/ButtonDoc.vue')
                 },
                 {
-                    path: '/uikit/table',
+                    path: '/dashboard/uikit/table',
                     name: 'table',
                     component: () => import('@/views/uikit/TableDoc.vue')
                 },
                 {
-                    path: '/uikit/list',
+                    path: '/dashboard/uikit/list',
                     name: 'list',
                     component: () => import('@/views/uikit/ListDoc.vue')
                 },
                 {
-                    path: '/uikit/tree',
+                    path: '/dashboard/uikit/tree',
                     name: 'tree',
                     component: () => import('@/views/uikit/TreeDoc.vue')
                 },
                 {
-                    path: '/uikit/panel',
+                    path: '/dashboard/uikit/panel',
                     name: 'panel',
                     component: () => import('@/views/uikit/PanelsDoc.vue')
                 },
 
                 {
-                    path: '/uikit/overlay',
+                    path: '/dashboard/uikit/overlay',
                     name: 'overlay',
                     component: () => import('@/views/uikit/OverlayDoc.vue')
                 },
                 {
-                    path: '/uikit/media',
+                    path: '/dashboard/uikit/media',
                     name: 'media',
                     component: () => import('@/views/uikit/MediaDoc.vue')
                 },
                 {
-                    path: '/uikit/message',
+                    path: '/dashboard/uikit/message',
                     name: 'message',
                     component: () => import('@/views/uikit/MessagesDoc.vue')
                 },
                 {
-                    path: '/uikit/file',
+                    path: '/dashboard/uikit/file',
                     name: 'file',
                     component: () => import('@/views/uikit/FileDoc.vue')
                 },
                 {
-                    path: '/uikit/menu',
+                    path: '/dashboard/uikit/menu',
                     name: 'menu',
                     component: () => import('@/views/uikit/MenuDoc.vue')
                 },
                 {
-                    path: '/uikit/charts',
+                    path: '/dashboard/uikit/charts',
                     name: 'charts',
                     component: () => import('@/views/uikit/ChartDoc.vue')
                 },
                 {
-                    path: '/uikit/misc',
+                    path: '/dashboard/uikit/misc',
                     name: 'misc',
                     component: () => import('@/views/uikit/MiscDoc.vue')
                 },
                 {
-                    path: '/uikit/timeline',
+                    path: '/dashboard/uikit/timeline',
                     name: 'timeline',
                     component: () => import('@/views/uikit/TimelineDoc.vue')
                 },
                 {
-                    path: '/pages/empty',
+                    path: '/dashboard/pages/empty',
                     name: 'empty',
                     component: () => import('@/views/pages/Empty.vue')
                 },
                 {
-                    path: '/pages/crud',
+                    path: '/dashboard/pages/crud',
                     name: 'crud',
                     component: () => import('@/views/pages/Crud.vue')
                 },
                 {
-                    path: '/documentation',
+                    path: '/dashboard/documentation',
                     name: 'documentation',
                     component: () => import('@/views/pages/Documentation.vue')
                 }
