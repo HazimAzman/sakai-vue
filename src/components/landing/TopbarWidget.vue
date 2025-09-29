@@ -53,7 +53,7 @@ function smoothScroll(id) {
                 </a>
             </li>
             <li>
-                <a @click="smoothScroll('contact')" class="px-0 py-4 text-surface-900 dark:text-surface-0 font-medium text-xl">
+                <a @click="smoothScroll('download')" class="px-0 py-4 text-surface-900 dark:text-surface-0 font-medium text-xl">
                     <span>Download</span>
                 </a>
             </li>
