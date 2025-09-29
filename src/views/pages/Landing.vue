@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import AboutWidget from '@/components/landing/AboutWidget.vue';
 import ClientsWidget from '@/components/landing/ClientsWidget.vue';
+import DownloadWidget from '@/components/landing/DownloadWidget.vue';
 import FooterWidget from '@/components/landing/FooterWidget.vue';
 import HeroWidget from '@/components/landing/HeroWidget.vue';
 import InstituteWidget from '@/components/landing/InstituteWidget.vue';
@@ -27,10 +28,12 @@ import VisionCarousel from '@/components/landing/VisionCarousel.vue';
             />
             <ServiceWidget />
             <ProductWidget />
+            
             <ClientsWidget />
             <InstituteWidget />
             <AboutWidget />
             <ContactWidget />
+            <DownloadWidget />
             <FooterWidget />
         </div>
     </div>
