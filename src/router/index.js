@@ -6,7 +6,8 @@ const router = createRouter({
     routes: [
         {
             path: '/',
-            redirect: '/landing'
+            name: 'landing',
+            component: () => import('@/views/pages/Landing.vue')
         },
         {
             path: '/dashboard',
@@ -110,11 +111,7 @@ const router = createRouter({
                 }
             ]
         },
-        {
-            path: '/landing',
-            name: 'landing',
-            component: () => import('@/views/pages/Landing.vue')
-        },
+        
         {
             path: '/pages/notfound',
             name: 'notfound',
