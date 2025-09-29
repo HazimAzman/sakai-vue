@@ -51,7 +51,7 @@ const getUrl = (brand) => brandToUrl.value[brand] || '#';
 </script>
 
 <template>
-    <div class="py-6 px-6 lg:px-20 mx-0 my-12 lg:mx-20">
+    <div id="download" class="py-6 px-6 lg:px-20 mx-0 my-12 lg:mx-20">
         <div class="text-center mb-8">
             <div class="text-surface-900 dark:text-surface-0 font-bold mb-2 text-3xl md:text-4xl">Download Center</div>
             <div class="h-1 w-16 bg-primary-500 mx-auto mb-2"></div>
