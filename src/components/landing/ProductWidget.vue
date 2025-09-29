@@ -264,10 +264,29 @@
 
         <!-- Message Us Button -->
         <div class="fixed bottom-6 right-6 z-50">
-            <button class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 transition-colors duration-300">
+            <button @click="openChatra" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 transition-colors duration-300">
                 <div class="w-2 h-2 bg-white rounded-full"></div>
                 <span class="font-medium">Message us</span>
             </button>
         </div>
     </div>
 </template>
+
+<script>
+export default {
+    name: 'ProductWidget',
+    methods: {
+        openChatra() {
+            // Check if Chatra is available
+            if (window.Chatra) {
+                window.Chatra('openChat', true);
+            } else {
+                // If Chatra is not loaded, you can redirect to Chatra or show a message
+                console.log('Chatra is not loaded. Please ensure Chatra script is included in your HTML.');
+                // Alternative: redirect to your Chatra dashboard or contact page
+                // window.open('https://app.chatra.io', '_blank');
+            }
+        }
+    }
+}
+</script>

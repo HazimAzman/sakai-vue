@@ -1,5 +1,5 @@
 <template>
-    <div id="highlights" class="py-6 px-6 lg:px-20 mx-0 my-12 lg:mx-20">
+    <div id="clients" class="py-6 px-6 lg:px-20 mx-0 my-12 lg:mx-20">
         <div class="text-center mb-16">
             <div class="text-surface-900 dark:text-surface-0 font-bold mb-4 text-5xl">Client</div>
             <div class="h-1 w-16 bg-primary-500 mx-auto mb-4"></div>

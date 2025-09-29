@@ -38,7 +38,7 @@ function smoothScroll(id) {
                 </a>
             </li>
             <li>
-                <a @click="smoothScroll('highlights')" class="px-0 py-4 text-surface-900 dark:text-surface-0 font-medium text-xl">
+                <a @click="smoothScroll('clients')" class="px-0 py-4 text-surface-900 dark:text-surface-0 font-medium text-xl">
                     <span>Client</span>
                 </a>
             </li>
@@ -58,9 +58,6 @@ function smoothScroll(id) {
                 </a>
             </li>
         </ul>
-        <div class="flex border-t lg:border-t-0 border-surface py-4 lg:py-0 mt-4 lg:mt-0 gap-2">
-            <Button label="Login" text as="router-link" to="/auth/login" rounded></Button>
-            <Button label="Register" as="router-link" to="/auth/login" rounded></Button>
-        </div>
+ 
     </div>
 </template>
