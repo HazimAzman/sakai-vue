@@ -6,132 +6,71 @@
             <span class="text-surface-600 dark:text-surface-300 text-2xl">People behind your great experience.</span>
         </div>
 
+        <!-- Loading State -->
+        <div v-if="loading" class="flex justify-center items-center py-12">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
+        </div>
+
+        <!-- Error State -->
+        <div v-else-if="error" class="text-center py-12">
+            <div class="text-red-500 text-lg">Failed to load clients. Please try again later.</div>
+        </div>
+
         <!-- University Logos Grid -->
-        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-6">
-            <!-- Row 1 -->
-            <div class="bg-white dark:bg-surface-800 rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow duration-300">
-                <img src="/images/universiti/umk.png" alt="UMK" class="h-12 mx-auto mb-3 object-contain" />
-                <div class="text-sm font-semibold text-surface-900 dark:text-surface-0">Universiti Malaysia Kelantan</div>
-                <div class="text-xs text-surface-600 dark:text-surface-300">(UMK)</div>
-            </div>
-
-            <div class="bg-white dark:bg-surface-800 rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow duration-300">
-                <img src="/images/universiti/um.png" alt="UM" class="h-12 mx-auto mb-3 object-contain" />
-                <div class="text-sm font-semibold text-surface-900 dark:text-surface-0">Universiti Malaya</div>
-                <div class="text-xs text-surface-600 dark:text-surface-300">(UM)</div>
-            </div>
-
-            <div class="bg-white dark:bg-surface-800 rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow duration-300">
-                <img src="/images/universiti/upm.png" alt="UPM" class="h-12 mx-auto mb-3 object-contain" />
-                <div class="text-sm font-semibold text-surface-900 dark:text-surface-0">Universiti Putra Malaysia</div>
-                <div class="text-xs text-surface-600 dark:text-surface-300">(UPM)</div>
-            </div>
-
-            <div class="bg-white dark:bg-surface-800 rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow duration-300">
-                <img src="/images/universiti/umt.png" alt="UMT" class="h-12 mx-auto mb-3 object-contain" />
-                <div class="text-sm font-semibold text-surface-900 dark:text-surface-0">Universiti Malaysia Terengganu</div>
-                <div class="text-xs text-surface-600 dark:text-surface-300">(UMT)</div>
-            </div>
-
-            <!-- Row 2 -->
-            <div class="bg-white dark:bg-surface-800 rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow duration-300">
-                <img src="/images/universiti/ukm.png" alt="UKM" class="h-12 mx-auto mb-3 object-contain" />
-                <div class="text-sm font-semibold text-surface-900 dark:text-surface-0">Universiti Kebangsaan Malaysia</div>
-                <div class="text-xs text-surface-600 dark:text-surface-300">(UKM)</div>
-            </div>
-
-            <div class="bg-white dark:bg-surface-800 rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow duration-300">
-                <img src="/images/universiti/utm.png" alt="UTM" class="h-12 mx-auto mb-3 object-contain" />
-                <div class="text-sm font-semibold text-surface-900 dark:text-surface-0">Universiti Teknologi Malaysia</div>
-                <div class="text-xs text-surface-600 dark:text-surface-300">(UTM)</div>
-            </div>
-
-            <div class="bg-white dark:bg-surface-800 rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow duration-300">
-                <img src="/images/universiti/unimas.png" alt="UNIMAS" class="h-12 mx-auto mb-3 object-contain" />
-                <div class="text-sm font-semibold text-surface-900 dark:text-surface-0">Universiti Malaysia Sarawak</div>
-                <div class="text-xs text-surface-600 dark:text-surface-300">(UNIMAS)</div>
-            </div>
-
-            <div class="bg-white dark:bg-surface-800 rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow duration-300">
-                <img src="/images/universiti/ump.png" alt="UMP" class="h-12 mx-auto mb-3 object-contain" />
-                <div class="text-sm font-semibold text-surface-900 dark:text-surface-0">Universiti Malaysia Pahang</div>
-                <div class="text-xs text-surface-600 dark:text-surface-300">(UMP)</div>
-            </div>
-
-            <!-- Row 3 -->
-            <div class="bg-white dark:bg-surface-800 rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow duration-300">
-                <img src="/images/universiti/uitm.png" alt="UiTM" class="h-12 mx-auto mb-3 object-contain" />
-                <div class="text-sm font-semibold text-surface-900 dark:text-surface-0">Universiti Teknologi Mara</div>
-                <div class="text-xs text-surface-600 dark:text-surface-300">(UiTM)</div>
-            </div>
-
-            <div class="bg-white dark:bg-surface-800 rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow duration-300">
-                <img src="/images/universiti/ums.png" alt="UMS" class="h-12 mx-auto mb-3 object-contain" />
-                <div class="text-sm font-semibold text-surface-900 dark:text-surface-0">Universiti Malaysia Sabah</div>
-                <div class="text-xs text-surface-600 dark:text-surface-300">(UMS)</div>
-            </div>
-
-            <div class="bg-white dark:bg-surface-800 rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow duration-300">
-                <img src="/images/universiti/upsi.png" alt="UPSI" class="h-12 mx-auto mb-3 object-contain" />
-                <div class="text-sm font-semibold text-surface-900 dark:text-surface-0">Universiti Pendidikan Sultan Idris</div>
-                <div class="text-xs text-surface-600 dark:text-surface-300">(UPSI)</div>
-            </div>
-
-            <div class="bg-white dark:bg-surface-800 rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow duration-300">
-                <img src="/images/universiti/utem.png" alt="UTeM" class="h-12 mx-auto mb-3 object-contain" />
-                <div class="text-sm font-semibold text-surface-900 dark:text-surface-0">Universiti Teknikal Malaysia Melaka</div>
-                <div class="text-xs text-surface-600 dark:text-surface-300">(UTeM)</div>
-            </div>
-
-            <!-- Row 4 -->
-            <div class="bg-white dark:bg-surface-800 rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow duration-300">
-                <img src="/images/universiti/upnm.png" alt="UPNM" class="h-12 mx-auto mb-3 object-contain" />
-                <div class="text-sm font-semibold text-surface-900 dark:text-surface-0">Universiti Pertahanan Nasional Malaysia</div>
-                <div class="text-xs text-surface-600 dark:text-surface-300">(UPNM)</div>
-            </div>
-
-            <div class="bg-white dark:bg-surface-800 rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow duration-300">
-                <img src="/images/universiti/usim.png" alt="USIM" class="h-12 mx-auto mb-3 object-contain" />
-                <div class="text-sm font-semibold text-surface-900 dark:text-surface-0">Universiti Sains Islam Malaysia</div>
-                <div class="text-xs text-surface-600 dark:text-surface-300">(USIM)</div>
-            </div>
-
-            <div class="bg-white dark:bg-surface-800 rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow duration-300">
-                <img src="/images/universiti/uia.png" alt="UIA" class="h-12 mx-auto mb-3 object-contain" />
-                <div class="text-sm font-semibold text-surface-900 dark:text-surface-0">Universiti Islam Antarabangsa Malaysia</div>
-                <div class="text-xs text-surface-600 dark:text-surface-300">(UIA)</div>
-            </div>
-
-            <div class="bg-white dark:bg-surface-800 rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow duration-300">
-                <img src="/images/universiti/uthm.png" alt="UTHM" class="h-12 mx-auto mb-3 object-contain" />
-                <div class="text-sm font-semibold text-surface-900 dark:text-surface-0">Universiti Tun Hussein Onn Malaysia</div>
-                <div class="text-xs text-surface-600 dark:text-surface-300">(UTHM)</div>
-            </div>
-
-            <!-- Row 5 -->
-            <div class="bg-white dark:bg-surface-800 rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow duration-300">
-                <img src="/images/universiti/unisza.png" alt="UniSZA" class="h-12 mx-auto mb-3 object-contain" />
-                <div class="text-sm font-semibold text-surface-900 dark:text-surface-0">Universiti Sultan Zainal Abidin</div>
-                <div class="text-xs text-surface-600 dark:text-surface-300">(UniSZA)</div>
-            </div>
-
-            <div class="bg-white dark:bg-surface-800 rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow duration-300">
-                <img src="/images/universiti/unimap.png" alt="UniMAP" class="h-12 mx-auto mb-3 object-contain" />
-                <div class="text-sm font-semibold text-surface-900 dark:text-surface-0">Universiti Malaysia Perlis</div>
-                <div class="text-xs text-surface-600 dark:text-surface-300">(UniMAP)</div>
-            </div>
-
-            <div class="bg-white dark:bg-surface-800 rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow duration-300">
-                <img src="/images/universiti/usm.png" alt="USM" class="h-12 mx-auto mb-3 object-contain" />
-                <div class="text-sm font-semibold text-surface-900 dark:text-surface-0">Universiti Sains Malaysia</div>
-                <div class="text-xs text-surface-600 dark:text-surface-300">(USM)</div>
-            </div>
-
-            <div class="bg-white dark:bg-surface-800 rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow duration-300">
-                <img src="/images/universiti/uum.png" alt="UUM" class="h-12 mx-auto mb-3 object-contain" />
-                <div class="text-sm font-semibold text-surface-900 dark:text-surface-0">Universiti Utara Malaysia</div>
-                <div class="text-xs text-surface-600 dark:text-surface-300">(UUM)</div>
+        <div v-else class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-6">
+            <div 
+                v-for="client in clients" 
+                :key="client.id"
+                class="bg-white dark:bg-surface-800 rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow duration-300"
+            >
+                <img 
+                    :src="client.logo_path" 
+                    :alt="client.name" 
+                    class="h-12 mx-auto mb-3 object-contain"
+                    @error="handleImageError"
+                />
+                <div class="text-sm font-semibold text-surface-900 dark:text-surface-0">{{ client.name }}</div>
+                <div class="text-xs text-surface-600 dark:text-surface-300">({{ client.short_name }})</div>
             </div>
         </div>
     </div>
 </template>
+
+<script setup>
+import { ApiService } from '@/service/ApiService.js';
+import { onMounted, ref } from 'vue';
+
+const clients = ref([]);
+const loading = ref(true);
+const error = ref(false);
+
+const loadClients = async () => {
+    try {
+        loading.value = true;
+        error.value = false;
+        
+        const response = await ApiService.getClients();
+        clients.value = response.data || response;
+        
+        // If no clients, show empty state
+        if (!clients.value || clients.value.length === 0) {
+            clients.value = [];
+        }
+    } catch (err) {
+        console.error('Failed to load clients:', err);
+        error.value = true;
+        clients.value = [];
+    } finally {
+        loading.value = false;
+    }
+};
+
+const handleImageError = (event) => {
+    // Set a placeholder image if the original fails to load
+    event.target.src = '/images/placeholder-client.png';
+};
+
+onMounted(() => {
+    loadClients();
+});
+</script>

@@ -20,11 +20,24 @@
                 </div>
             </div>
 
+            <!-- Loading State -->
+            <div v-if="loading" class="flex justify-center items-center py-12">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
+            </div>
+
+            <!-- Error State -->
+            <div v-else-if="error" class="text-center py-12">
+                <div class="text-red-500 text-lg">Failed to load contact information. Please try again later.</div>
+            </div>
+
             <!-- Office Contact Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
-                <!-- Northern Office -->
-                <div class="bg-white rounded-lg shadow-lg p-6 border border-gray-100">
-                    <h3 class="text-surface-900 dark:text-surface-0 font-bold text-xl mb-4">Northern Office</h3>
+            <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
+                <div 
+                    v-for="contact in contacts" 
+                    :key="contact.id"
+                    class="bg-white rounded-lg shadow-lg p-6 border border-gray-100"
+                >
+                    <h3 class="text-surface-900 dark:text-surface-0 font-bold text-xl mb-4">{{ contact.name }}</h3>
                     
                     <div class="space-y-4">
                         <div class="flex items-start">
@@ -32,57 +45,7 @@
                             <div>
                                 <div class="text-red-500 font-semibold text-sm mb-1">FIND US</div>
                                 <div class="text-surface-700 dark:text-surface-300 text-sm leading-relaxed">
-                                    Plot 85B, Lintang Bayan Lepas 9, Bayan Lepas Industrial Park Phase 4, 11900 Bayan Lepas, Penang
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="flex items-start">
-                            <i class="pi pi-phone text-red-500 text-lg mr-3 mt-1"></i>
-                            <div>
-                                <div class="text-red-500 font-semibold text-sm mb-1">CALL US</div>
-                                <div class="text-surface-700 dark:text-surface-300 text-sm">04-6432 080</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Central Office -->
-                <div class="bg-white rounded-lg shadow-lg p-6 border border-gray-100">
-                    <h3 class="text-surface-900 dark:text-surface-0 font-bold text-xl mb-4">Central Office</h3>
-                    
-                    <div class="space-y-4">
-                        <div class="flex items-start">
-                            <i class="pi pi-map-marker text-red-500 text-lg mr-3 mt-1"></i>
-                            <div>
-                                <div class="text-red-500 font-semibold text-sm mb-1">FIND US</div>
-                                <div class="text-surface-700 dark:text-surface-300 text-sm leading-relaxed">
-                                    Lot 12A, Jalan Gitar 33/3, Elite Industrial Park, 40350 Shah Alam, Selangor
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="flex items-start">
-                            <i class="pi pi-phone text-red-500 text-lg mr-3 mt-1"></i>
-                            <div>
-                                <div class="text-red-500 font-semibold text-sm mb-1">CALL US</div>
-                                <div class="text-surface-700 dark:text-surface-300 text-sm">03-5121 2673</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Southern Office -->
-                <div class="bg-white rounded-lg shadow-lg p-6 border border-gray-100">
-                    <h3 class="text-surface-900 dark:text-surface-0 font-bold text-xl mb-4">Southern Office</h3>
-                    
-                    <div class="space-y-4">
-                        <div class="flex items-start">
-                            <i class="pi pi-map-marker text-red-500 text-lg mr-3 mt-1"></i>
-                            <div>
-                                <div class="text-red-500 font-semibold text-sm mb-1">FIND US</div>
-                                <div class="text-surface-700 dark:text-surface-300 text-sm leading-relaxed">
-                                    No 19, Jalan Cantik 3, Taman Pelangi Indah, 81800 Ulu Tiram, Johor
+                                    {{ contact.address }}
                                 </div>
                             </div>
                         </div>
@@ -92,61 +55,7 @@
                             <div>
                                 <div class="text-red-500 font-semibold text-sm mb-1">CALL US</div>
                                 <div class="text-surface-700 dark:text-surface-300 text-sm">
-                                    <div>07-8619511</div>
-                                    <div>07-8612790</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Sarawak Office -->
-                <div class="bg-white rounded-lg shadow-lg p-6 border border-gray-100">
-                    <h3 class="text-surface-900 dark:text-surface-0 font-bold text-xl mb-4">Sarawak Office</h3>
-                    
-                    <div class="space-y-4">
-                        <div class="flex items-start">
-                            <i class="pi pi-map-marker text-red-500 text-lg mr-3 mt-1"></i>
-                            <div>
-                                <div class="text-red-500 font-semibold text-sm mb-1">FIND US</div>
-                                <div class="text-surface-700 dark:text-surface-300 text-sm leading-relaxed">
-                                    9th Floor, Bangunan Binamas, Jalan Padungan, 93100 Kuching, Sarawak
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="flex items-start">
-                            <i class="pi pi-phone text-red-500 text-lg mr-3 mt-1"></i>
-                            <div>
-                                <div class="text-red-500 font-semibold text-sm mb-1">CALL US</div>
-                                <div class="text-surface-700 dark:text-surface-300 text-sm">016-8079 616</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Sabah Office -->
-                <div class="bg-white rounded-lg shadow-lg p-6 border border-gray-100">
-                    <h3 class="text-surface-900 dark:text-surface-0 font-bold text-xl mb-4">Sabah Office</h3>
-                    
-                    <div class="space-y-4">
-                        <div class="flex items-start">
-                            <i class="pi pi-map-marker text-red-500 text-lg mr-3 mt-1"></i>
-                            <div>
-                                <div class="text-red-500 font-semibold text-sm mb-1">FIND US</div>
-                                <div class="text-surface-700 dark:text-surface-300 text-sm leading-relaxed">
-                                    8-1, 8th Floor, Suria Sabah Shopping Mall, No.1, Jalan Tun Fuad Stephen, 88000 Kota Kinabalu, Sabah
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="flex items-start">
-                            <i class="pi pi-phone text-red-500 text-lg mr-3 mt-1"></i>
-                            <div>
-                                <div class="text-red-500 font-semibold text-sm mb-1">CALL US</div>
-                                <div class="text-surface-700 dark:text-surface-300 text-sm">
-                                    <div>016-8398 627</div>
-                                    <div>088-366 500</div>
+                                    <div v-for="phone in getPhoneNumbers(contact.phone)" :key="phone">{{ phone }}</div>
                                 </div>
                             </div>
                         </div>
@@ -156,3 +65,42 @@
         </div>
     </div>
 </template>
+
+<script setup>
+import { ApiService } from '@/service/ApiService.js';
+import { onMounted, ref } from 'vue';
+
+const contacts = ref([]);
+const loading = ref(true);
+const error = ref(false);
+
+const loadContacts = async () => {
+    try {
+        loading.value = true;
+        error.value = false;
+        
+        const response = await ApiService.getContacts();
+        contacts.value = response.value || response.data || response;
+        
+        // If no contacts, show empty state
+        if (!contacts.value || contacts.value.length === 0) {
+            contacts.value = [];
+        }
+    } catch (err) {
+        console.error('Failed to load contacts:', err);
+        error.value = true;
+        contacts.value = [];
+    } finally {
+        loading.value = false;
+    }
+};
+
+const getPhoneNumbers = (phoneString) => {
+    if (!phoneString) return [];
+    return phoneString.split('\n').filter(phone => phone.trim() !== '');
+};
+
+onMounted(() => {
+    loadContacts();
+});
+</script>

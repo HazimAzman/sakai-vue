@@ -1,4 +1,18 @@
+import { ApiService } from './ApiService.js';
+
 export const ProductService = {
+    // Get products from API
+    async getProductsFromAPI() {
+        try {
+            const products = await ApiService.getProducts();
+            return products;
+        } catch (error) {
+            console.error('Failed to fetch products from API:', error);
+            // Fallback to local data if API fails
+            return this.getProductsData();
+        }
+    },
+
     getProductsData() {
         return [
             {

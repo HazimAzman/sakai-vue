@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import AboutWidget from '@/components/landing/AboutWidget.vue';
+import ActivityWidget from '@/components/landing/ActivityWidget.vue';
 import ClientsWidget from '@/components/landing/ClientsWidget.vue';
+import ContactWidget from '@/components/landing/ContactWidget.vue';
 import DownloadWidget from '@/components/landing/DownloadWidget.vue';
 import FooterWidget from '@/components/landing/FooterWidget.vue';
 import HeroWidget from '@/components/landing/HeroWidget.vue';
@@ -26,7 +28,9 @@ import VisionCarousel from '@/components/landing/VisionCarousel.vue';
                 ]"
                 :autoplayMs="7000"
             />
+            <ActivityWidget />
             <ServiceWidget />
+         
             <ProductWidget />
             
             <ClientsWidget />

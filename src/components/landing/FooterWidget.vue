@@ -28,9 +28,11 @@
             <div class="col-span-12 md:col-span-4">
                 <h4 class="text-white font-bold text-xl mb-4">RESOURCE</h4>
                 <div class="space-y-2 mb-6">
-                    <a href="/landing#product" class="block text-gray-300 hover:text-white transition-colors">Product</a>
-                    <a href="/landing#highlights" class="block text-gray-300 hover:text-white transition-colors">Client</a>
-                    <a href="/landing#about" class="block text-gray-300 hover:text-white transition-colors">About</a>
+                    <a href="/#product" class="block text-gray-300 hover:text-white transition-colors">Product</a>
+                    <a href="/#clients" class="block text-gray-300 hover:text-white transition-colors">Client</a>
+                    <a href="/#about" class="block text-gray-300 hover:text-white transition-colors">About</a>
+                    <a href="/#institute" class="block text-gray-300 hover:text-white transition-colors">Institute</a>
+                    <a href="/#download" class="block text-gray-300 hover:text-white transition-colors">Download</a>
                 </div>
                 <div class="text-gray-400 text-sm">
                     Registered MOF: 357-0203-5897 & Registered as BUMIPUTERA company.
@@ -41,19 +43,19 @@
             <div class="col-span-12 md:col-span-4">
                 <h4 class="text-white font-bold text-xl mb-4">SUPPORT</h4>
                 <div class="space-y-2 mb-6">
-                    <a href="/landing#contact" class="flex items-center text-gray-300 hover:text-white transition-colors">
+                    <a href="#contact" class="flex items-center text-gray-300 hover:text-white transition-colors">
                         <i class="pi pi-phone mr-2"></i>
                         Contact
                     </a>
-                    <a href="#" class="flex items-center text-gray-300 hover:text-white transition-colors">
+                    <router-link to="/privacy-policy" class="flex items-center text-gray-300 hover:text-white transition-colors">
                         <i class="pi pi-file mr-2"></i>
                         Privacy Policy
-                    </a>
+                    </router-link>
                 </div>
                 
                 <!-- Social Media Icons -->
                 <div class="flex space-x-3">
-                    <a href="#" class="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center hover:bg-gray-600 transition-colors">
+                    <a href="https://www.facebook.com/aztecsinar/" class="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center hover:bg-gray-600 transition-colors">
                         <i class="pi pi-facebook text-white"></i>
                     </a>
                     <a href="#" class="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center hover:bg-gray-600 transition-colors">

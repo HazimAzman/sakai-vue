@@ -10,6 +10,22 @@ const router = createRouter({
             component: () => import('@/views/pages/Landing.vue')
         },
         {
+            path: '/login',
+            name: 'login',
+            component: () => import('@/views/pages/auth/Login.vue')
+        },
+        {
+            path: '/admin',
+            name: 'admin',
+            component: () => import('@/views/pages/Admin.vue'),
+            meta: { requiresAuth: true }
+        },
+        {
+            path: '/privacy-policy',
+            name: 'privacy-policy',
+            component: () => import('@/views/pages/PrivacyPolicy.vue')
+        },
+        {
             path: '/dashboard',
             component: AppLayout,
             children: [
@@ -108,6 +124,11 @@ const router = createRouter({
                     path: '/dashboard/documentation',
                     name: 'documentation',
                     component: () => import('@/views/pages/Documentation.vue')
+                },
+                {
+                    path: '/dashboard/products',
+                    name: 'products',
+                    component: () => import('@/views/pages/Products.vue')
                 }
             ]
         },
@@ -134,6 +155,19 @@ const router = createRouter({
             component: () => import('@/views/pages/auth/Error.vue')
         }
     ]
+});
+
+// Authentication guard
+router.beforeEach((to, from, next) => {
+    const isLoggedIn = localStorage.getItem('adminLoggedIn');
+    
+    if (to.meta.requiresAuth && !isLoggedIn) {
+        next('/auth/login');
+    } else if (to.path === '/auth/login' && isLoggedIn) {
+        next('/admin');
+    } else {
+        next();
+    }
 });
 
 export default router;

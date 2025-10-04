@@ -73,6 +73,17 @@ const model = ref([
                 label: 'Empty',
                 icon: 'pi pi-fw pi-circle-off',
                 to: '/pages/empty'
+            },
+            {
+                label: 'Products (API)',
+                icon: 'pi pi-fw pi-shopping-bag',
+                to: '/products'
+            }
+        ,
+            {
+                label: 'Admin',
+                icon: 'pi pi-fw pi-cog',
+                to: '/admin'
             }
         ]
     },

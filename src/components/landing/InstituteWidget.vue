@@ -6,82 +6,71 @@
             <span class="text-surface-600 dark:text-surface-300 text-2xl">People behind your great experience.</span>
         </div>
 
+        <!-- Loading State -->
+        <div v-if="loading" class="flex justify-center items-center py-12">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
+        </div>
+
+        <!-- Error State -->
+        <div v-else-if="error" class="text-center py-12">
+            <div class="text-red-500 text-lg">Failed to load institutes. Please try again later.</div>
+        </div>
+
         <!-- Institute Logos Grid -->
-        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-6">
-            <!-- Row 1 -->
-            <div class="bg-white dark:bg-surface-800 rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow duration-300">
-                <img src="/images/institut/jtm.png" alt="JTM" class="h-16 mx-auto mb-4 object-contain" />
-                <div class="text-sm font-semibold text-surface-900 dark:text-surface-0">Jabatan Tenaga Manusia</div>
-                <div class="text-xs text-surface-600 dark:text-surface-300">(jTm)</div>
-            </div>
-
-            <div class="bg-white dark:bg-surface-800 rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow duration-300">
-                <img src="/images/institut/imr.png" alt="IMR" class="h-16 mx-auto mb-4 object-contain" />
-                <div class="text-sm font-semibold text-surface-900 dark:text-surface-0">Institut Penyelidikan Perubatan Malaysia</div>
-                <div class="text-xs text-surface-600 dark:text-surface-300">(IMR)</div>
-            </div>
-
-            <div class="bg-white dark:bg-surface-800 rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow duration-300">
-                <img src="/images/institut/mardi.png" alt="MARDI" class="h-16 mx-auto mb-4 object-contain" />
-                <div class="text-sm font-semibold text-surface-900 dark:text-surface-0">Institut Penyelidikan Dan Kemajuan Pertanian Malaysia</div>
-                <div class="text-xs text-surface-600 dark:text-surface-300">(MARDI)</div>
-            </div>
-
-            <div class="bg-white dark:bg-surface-800 rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow duration-300">
-                <img src="/images/institut/lgm.png" alt="LGM" class="h-16 mx-auto mb-4 object-contain" />
-                <div class="text-sm font-semibold text-surface-900 dark:text-surface-0">Lembaga Getah Malaysia</div>
-                <div class="text-xs text-surface-600 dark:text-surface-300">(LGM)</div>
-            </div>
-
-            <!-- Row 2 -->
-            <div class="bg-white dark:bg-surface-800 rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow duration-300">
-                <img src="/images/institut/frim.png" alt="FRIM" class="h-16 mx-auto mb-4 object-contain" />
-                <div class="text-sm font-semibold text-surface-900 dark:text-surface-0">Institut Penyelidikan Perhutanan</div>
-                <div class="text-xs text-surface-600 dark:text-surface-300">(FRIM)</div>
-            </div>
-
-            <div class="bg-white dark:bg-surface-800 rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow duration-300">
-                <img src="/images/institut/halal.png" alt="HALAL" class="h-16 mx-auto mb-4 object-contain" />
-                <div class="text-sm font-semibold text-surface-900 dark:text-surface-0">Halal Malaysia</div>
-                <div class="text-xs text-surface-600 dark:text-surface-300">(HALAL)</div>
-            </div>
-
-            <div class="bg-white dark:bg-surface-800 rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow duration-300">
-                <img src="/images/institut/felda.png" alt="FELDA" class="h-16 mx-auto mb-4 object-contain" />
-                <div class="text-sm font-semibold text-surface-900 dark:text-surface-0">Lembaga Kemajuan Tanah Persekutuan</div>
-                <div class="text-xs text-surface-600 dark:text-surface-300">(FELDA)</div>
-            </div>
-
-            <div class="bg-white dark:bg-surface-800 rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow duration-300">
-                <img src="/images/institut/petronas.png" alt="PETRONAS" class="h-16 mx-auto mb-4 object-contain" />
-                <div class="text-sm font-semibold text-surface-900 dark:text-surface-0">Petroliam Nasional Berhad</div>
-                <div class="text-xs text-surface-600 dark:text-surface-300">(PETRONAS)</div>
-            </div>
-
-            <!-- Row 3 -->
-            <div class="bg-white dark:bg-surface-800 rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow duration-300">
-                <img src="/images/institut/kimia.png" alt="KIMIA" class="h-16 mx-auto mb-4 object-contain" />
-                <div class="text-sm font-semibold text-surface-900 dark:text-surface-0">Jabatan Kimia Malaysia</div>
-                <div class="text-xs text-surface-600 dark:text-surface-300">(KIMIA)</div>
-            </div>
-
-            <div class="bg-white dark:bg-surface-800 rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow duration-300">
-                <img src="/images/institut/jpm.png" alt="JPM" class="h-16 mx-auto mb-4 object-contain" />
-                <div class="text-sm font-semibold text-surface-900 dark:text-surface-0">Jabatan Perikanan Malaysia</div>
-                <div class="text-xs text-surface-600 dark:text-surface-300">(JPM)</div>
-            </div>
-
-            <div class="bg-white dark:bg-surface-800 rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow duration-300">
-                <img src="/images/institut/jp.png" alt="JP" class="h-16 mx-auto mb-4 object-contain" />
-                <div class="text-sm font-semibold text-surface-900 dark:text-surface-0">Jabatan Pertanian</div>
-                <div class="text-xs text-surface-600 dark:text-surface-300">(JP)</div>
-            </div>
-
-            <div class="bg-white dark:bg-surface-800 rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow duration-300">
-                <img src="/images/institut/mpob.png" alt="MPOB" class="h-16 mx-auto mb-4 object-contain" />
-                <div class="text-sm font-semibold text-surface-900 dark:text-surface-0">Lembaga Minyak Sawit Malaysia</div>
-                <div class="text-xs text-surface-600 dark:text-surface-300">(MPOB)</div>
+        <div v-else class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-6">
+            <div 
+                v-for="institute in institutes" 
+                :key="institute.id"
+                class="bg-white dark:bg-surface-800 rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow duration-300"
+            >
+                <img 
+                    :src="institute.image_path" 
+                    :alt="institute.name" 
+                    class="h-16 mx-auto mb-4 object-contain"
+                    @error="handleImageError"
+                />
+                <div class="text-sm font-semibold text-surface-900 dark:text-surface-0">{{ institute.name }}</div>
+                <div class="text-xs text-surface-600 dark:text-surface-300">({{ institute.abbreviation }})</div>
             </div>
         </div>
     </div>
 </template>
+
+<script setup>
+import { ApiService } from '@/service/ApiService.js';
+import { onMounted, ref } from 'vue';
+
+const institutes = ref([]);
+const loading = ref(true);
+const error = ref(false);
+
+const loadInstitutes = async () => {
+    try {
+        loading.value = true;
+        error.value = false;
+        
+        const response = await ApiService.getInstitutes();
+        institutes.value = response.data || response;
+        
+        // If no institutes, show empty state
+        if (!institutes.value || institutes.value.length === 0) {
+            institutes.value = [];
+        }
+    } catch (err) {
+        console.error('Failed to load institutes:', err);
+        error.value = true;
+        institutes.value = [];
+    } finally {
+        loading.value = false;
+    }
+};
+
+const handleImageError = (event) => {
+    // Set a placeholder image if the original fails to load
+    event.target.src = '/images/placeholder-institute.png';
+};
+
+onMounted(() => {
+    loadInstitutes();
+});
+</script>
