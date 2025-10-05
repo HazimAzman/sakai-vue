@@ -36,6 +36,29 @@
     </div>
 </template>
 
+<style scoped>
+/* Grid styling */
+.grid {
+    display: grid;
+}
+
+.grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (min-width: 768px) {
+    .md\:grid-cols-4 {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 1024px) {
+    .lg\:grid-cols-4 {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+</style>
+
 <script setup>
 import { ApiService } from '@/service/ApiService.js';
 import { onMounted, ref } from 'vue';

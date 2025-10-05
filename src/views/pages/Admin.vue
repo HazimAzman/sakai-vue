@@ -229,7 +229,7 @@ const userInitials = computed(() => {
 const handleLogout = () => {
   localStorage.removeItem('adminLoggedIn');
   localStorage.removeItem('adminUser');
-  router.push('/login');
+  router.push('/auth/login');
 };
 
 onMounted(() => {
@@ -237,7 +237,7 @@ onMounted(() => {
   const user = localStorage.getItem('adminUser');
   
   if (!isLoggedIn || !user) {
-    router.push('/login');
+    router.push('/auth/login');
   } else {
     username.value = user;
   }

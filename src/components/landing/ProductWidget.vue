@@ -17,11 +17,11 @@
         </div>
 
         <!-- Product Brand Logos Grid -->
-        <div v-else class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-6">
+        <div v-else class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4">
             <div 
                 v-for="product in products" 
                 :key="product.id"
-                class="bg-white dark:bg-surface-800 rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow duration-300"
+                class="bg-white dark:bg-surface-800 rounded-lg shadow-md p-4 text-center hover:shadow-lg transition-shadow duration-300"
             >
                 <img 
                     :src="product.image_path" 
@@ -38,6 +38,29 @@
     </div>
 </template>
 
+<style scoped>
+/* Grid styling */
+.grid {
+    display: grid;
+}
+
+.grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (min-width: 768px) {
+    .md\:grid-cols-4 {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 1024px) {
+    .lg\:grid-cols-4 {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+</style>
+
 <script setup>
 import { ApiService } from '@/service/ApiService.js';
 import { onMounted, ref } from 'vue';
@@ -45,6 +68,7 @@ import { onMounted, ref } from 'vue';
 const products = ref([]);
 const loading = ref(true);
 const error = ref(false);
+
 
 const loadProducts = async () => {
     try {
