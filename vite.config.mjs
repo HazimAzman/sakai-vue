@@ -20,5 +20,14 @@ export default defineConfig({
         alias: {
             '@': fileURLToPath(new URL('./src', import.meta.url))
         }
-    }
+    },
+    server: {
+        proxy: {
+          '/api': {
+            target: 'http://localhost/sakai-vue/backend/web',
+            changeOrigin: true
+            // no rewrite — backend expects /api prefix
+          }
+        }
+      }
 });

@@ -42,13 +42,37 @@ const router = createRouter({
     ]
 });
 
-// Authentication guard
+// Authentication guard with token validation/expiry check
 router.beforeEach((to, _from, next) => {
     const isLoggedIn = localStorage.getItem('adminLoggedIn');
-    
-    if (to.meta.requiresAuth && !isLoggedIn) {
+    const token = localStorage.getItem('authToken');
+
+    // If a token exists, check expiry (JWT exp claim) on navigation
+    if (token) {
+        const parts = token.split('.');
+        if (parts.length === 3) {
+            try {
+                const payloadJson = atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'));
+                const payload = JSON.parse(decodeURIComponent(escape(payloadJson)));
+                const now = Math.floor(Date.now() / 1000);
+                if (typeof payload.exp === 'number' && payload.exp <= now) {
+                    // Token expired: clear auth state
+                    localStorage.removeItem('authToken');
+                    localStorage.removeItem('adminLoggedIn');
+                }
+            } catch (_) {
+                // On parse error, treat as invalid token
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('adminLoggedIn');
+            }
+        }
+    }
+
+    const stillLoggedIn = !!localStorage.getItem('adminLoggedIn');
+
+    if (to.meta.requiresAuth && !stillLoggedIn) {
         next('/auth/login');
-    } else if (to.path === '/auth/login' && isLoggedIn) {
+    } else if (to.path === '/auth/login' && stillLoggedIn) {
         next('/admin');
     } else {
         next();

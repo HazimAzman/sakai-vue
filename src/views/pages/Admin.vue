@@ -208,6 +208,7 @@
 </template>
 
 <script setup>
+import { ApiService } from '@/service/ApiService.js';
 import AboutEditor from '@/views/pages/components/AboutEditor.vue';
 import ActivityEditor from '@/views/pages/components/ActivityEditor.vue';
 import ClientEditor from '@/views/pages/components/ClientEditor.vue';
@@ -226,20 +227,29 @@ const userInitials = computed(() => {
   return username.value ? username.value.charAt(0).toUpperCase() : 'A';
 });
 
-const handleLogout = () => {
-  localStorage.removeItem('adminLoggedIn');
-  localStorage.removeItem('adminUser');
-  router.push('/auth/login');
+const handleLogout = async () => {
+  try {
+    await ApiService.logout();
+  } catch (_) {
+    // ignore network errors on logout
+  } finally {
+    localStorage.removeItem('adminLoggedIn');
+    localStorage.removeItem('adminUser');
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('authUser');
+    router.push('/auth/login');
+  }
 };
 
 onMounted(() => {
   const isLoggedIn = localStorage.getItem('adminLoggedIn');
-  const user = localStorage.getItem('adminUser');
-  
+  const adminUser = localStorage.getItem('adminUser');
+  const token = localStorage.getItem('authToken');
+  const user = localStorage.getItem('authUser');
   if (!isLoggedIn || !user) {
-    router.push('/auth/login');
+      router.push('/auth/login');
   } else {
-    username.value = user;
+    username.value = adminUser;
   }
 });
 </script>

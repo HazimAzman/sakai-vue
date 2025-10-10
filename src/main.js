@@ -40,6 +40,30 @@ app.use(PrimeVue, {
 app.use(ToastService);
 app.use(ConfirmationService);
 
+// On app load, proactively clear expired tokens
+(() => {
+    try {
+        const token = localStorage.getItem('authToken');
+        if (token) {
+            const parts = token.split('.');
+            if (parts.length === 3) {
+                const payloadJson = atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'));
+                const payload = JSON.parse(decodeURIComponent(escape(payloadJson)));
+                const now = Math.floor(Date.now() / 1000);
+                if (typeof payload.exp === 'number' && payload.exp <= now) {
+                    localStorage.removeItem('authToken');
+                    localStorage.removeItem('adminLoggedIn');
+                    localStorage.removeItem('authUser');
+                }
+            }
+        }
+    } catch (_) {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('adminLoggedIn');
+        localStorage.removeItem('authUser');
+    }
+})();
+
 // Register PrimeVue components globally
 app.component('Button', Button);
 app.component('InputText', InputText);

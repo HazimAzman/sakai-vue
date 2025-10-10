@@ -92,8 +92,10 @@ const loadProducts = async () => {
 };
 
 const handleImageError = (event) => {
-    // Set a placeholder image if the original fails to load
-    event.target.src = '/images/placeholder-product.png';
+    const img = event.target;
+    if (img.__fallbackApplied) return; // prevent infinite loop
+    img.__fallbackApplied = true;
+    img.src = '/images/placeholder-product.png';
 };
 
 onMounted(() => {

@@ -33,26 +33,58 @@ const validateForm = () => {
   return !errors.username && !errors.password;
 };
 
+// Determine API base URL: prefer Vite env, fallback to relative /api
+const API_BASE_URL = (import.meta?.env?.VITE_API_BASE_URL || '').replace(/\/$/, '') || '';
+
 const handleLogin = async () => {
   if (!validateForm()) return;
-  
+
   isLoading.value = true;
   loginError.value = '';
-  
-  // Simulate API call
-  setTimeout(() => {
-    if (credentials.username === 'hazim2101' && credentials.password === 'hazim2101') {
-      // Store login state
-      localStorage.setItem('adminLoggedIn', 'true');
-      localStorage.setItem('adminUser', credentials.username);
-      
-      // Redirect to admin panel
-      router.push('/admin');
-    } else {
-      loginError.value = 'Invalid username or password';
+
+  try {
+    // Support both proxied "/api" and absolute base URLs
+    const endpoint = API_BASE_URL
+      ? `${API_BASE_URL}/api/auth/login`
+      : `/api/auth/login`;
+
+    const resp = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        username: credentials.username,
+        password: credentials.password
+      })
+    });
+
+    const json = await resp.json();
+
+    if (!resp.ok || json?.success === false) {
+      throw new Error(json?.message || 'Invalid username or password');
     }
+
+    const token = json?.data?.token;
+    const user = json?.data?.user;
+
+    if (!token) {
+      throw new Error('No token returned by server');
+    }
+
+    // Persist auth
+    localStorage.setItem('adminLoggedIn', 'true');
+    localStorage.setItem('adminUser', user?.username || credentials.username);
+    localStorage.setItem('authToken', token);
+    if (user) localStorage.setItem('authUser', JSON.stringify(user));
+
+    // Navigate
+    router.push('/admin');
+  } catch (err) {
+    loginError.value = err?.message || 'Login failed';
+  } finally {
     isLoading.value = false;
-  }, 1000);
+  }
 };
 </script>
 

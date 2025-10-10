@@ -1,14 +1,28 @@
 // API Service for communicating with Yii2 backend
-const API_BASE_URL = 'http://localhost/sakai-vue/backend/backend-api/web';
+// Prefer Vite env base URL when available; default to relative '/api' via dev proxy
+const ENV_BASE = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE_URL) ? String(import.meta.env.VITE_API_BASE_URL).replace(/\/$/, '') : '';
+const API_BASE_URL = ENV_BASE || '';
+
+function authHeaders() {
+    try {
+        const token = localStorage.getItem('authToken');
+        return token ? { Authorization: `Bearer ${token}` } : {};
+    } catch (_) {
+        return {};
+    }
+}
 
 export const ApiService = {
     // Generic API call method
     async apiCall(endpoint, options = {}) {
         const url = `${API_BASE_URL}${endpoint}`;
+        const method = String(options.method || 'GET').toUpperCase();
+        const hasBody = options.body !== undefined && options.body !== null;
         const defaultOptions = {
             headers: {
-                'Content-Type': 'application/json',
                 'Accept': 'application/json',
+                ...authHeaders(),
+                ...(hasBody ? { 'Content-Type': 'application/json' } : {})
             },
         };
 
@@ -64,6 +78,16 @@ export const ApiService = {
     // Health check
     async healthCheck() {
         return this.apiCall('/api/health');
+    },
+
+    // Auth
+    async logout() {
+        // Send both Authorization header and token in body as fallback
+        const token = (typeof localStorage !== 'undefined') ? localStorage.getItem('authToken') : '';
+        return this.apiCall('/api/auth/logout', {
+            method: 'POST',
+            body: JSON.stringify({ token }),
+        });
     },
 
     // Products API
