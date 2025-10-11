@@ -23,7 +23,9 @@
                 <template #body="{ data }">
                     <div class="flex gap-2">
                         <Button icon="pi pi-pencil" size="small" @click="editProduct(data)" />
-                        <Button icon="pi pi-trash" size="small" severity="danger" @click="confirmDelete(data)" />
+                        <Button icon="pi pi-trash" size="small" severity="danger" 
+                                :loading="deleting" :disabled="deleting" 
+                                @click="confirmDelete(data)" />
                     </div>
                 </template>
             </Column>
@@ -51,12 +53,24 @@
             </div>
             
             <div class="field">
-                <label class="mr-4" for="image_path">Image Path *</label>
-                <InputText id="image_path" v-model="form.image_path" 
-                          placeholder="/images/product/example-150.png"
-                          :class="{ 'p-invalid': !form.image_path }" />
-                <small v-if="!form.image_path" class="p-error ml-4">Image path is required.</small>
-                <small class="text-500 ml-4">Enter the path to the product image (e.g., /images/product/brand-150.png)</small>
+                <label class="mr-4" for="image_path">Product Image *</label>
+                <FileUpload id="image_path" 
+                           mode="basic" 
+                           name="image" 
+                           accept="image/*" 
+                           :maxFileSize="5000000"
+                           @select="onImageSelect"
+                           :auto="true"
+                           chooseLabel="Choose Image"
+                           :class="{ 'p-invalid': !form.image_path }" />
+                <small v-if="!form.image_path" class="p-error ml-4">Product Image is required.</small>
+                <small class="text-500 ml-4">Upload an image for the product (max 5MB)</small>
+                
+                <!-- Preview uploaded image -->
+                <div v-if="form.image_path" class="mt-3">
+                    <img :src="form.image_path" :alt="form.name" 
+                         class="w-8rem h-8rem object-cover border-round border-1 border-300" />
+                </div>
             </div>
 
             <template #footer>
@@ -65,24 +79,45 @@
             </template>
         </Dialog>
 
-        <ConfirmDialog />
+        <!-- Custom Delete Confirmation Dialog -->
+        <Dialog v-model:visible="deleteDialogVisible" :modal="true" header="Confirm Delete" 
+                :style="{ width: '400px' }" class="p-fluid">
+            <div class="flex align-items-center">
+                <i class="pi pi-exclamation-triangle text-orange-500 text-2xl mr-3"></i>
+                <span>Are you sure you want to delete "{{ productToDelete?.name }}"?</span>
+            </div>
+            
+            <template #footer>
+                <Button label="Cancel" class="p-button-text" icon="pi pi-times" @click="deleteDialogVisible = false" />
+                <Button label="Delete" icon="pi pi-trash" severity="danger" @click="executeDelete" :loading="deleting" />
+            </template>
+        </Dialog>
     </div>
 </template>
 
 <script setup>
 import { useNotifications } from '@/composables/useNotifications';
 import { ApiService } from '@/service/ApiService.js';
-import { useConfirm } from 'primevue/useconfirm';
+import Button from 'primevue/button';
+import Column from 'primevue/column';
+import DataTable from 'primevue/datatable';
+import Dialog from 'primevue/dialog';
+import FileUpload from 'primevue/fileupload';
+import InputText from 'primevue/inputtext';
+import Textarea from 'primevue/textarea';
 import { onMounted, reactive, ref } from 'vue';
 
-const confirm = useConfirm();
 const { success, error, warning } = useNotifications();
 
 const products = ref([]);
 const loading = ref(false);
 const saving = ref(false);
+const deleting = ref(false);
 const dialogVisible = ref(false);
+const deleteDialogVisible = ref(false);
 const currentProduct = ref(null);
+const productToDelete = ref(null);
+const selectedFile = ref(null);
 const form = reactive({ 
     name: '', 
     description: '', 
@@ -95,6 +130,37 @@ const resetForm = () => {
     form.description = '';
     form.image_path = '';
     form.category = '';
+};
+
+const onImageSelect = (event) => {
+    const file = event.files[0];
+    if (file) {
+        selectedFile.value = file;
+        form.image_path = URL.createObjectURL(file);
+    }
+};
+
+const uploadImage = async (file) => {
+    const formData = new FormData();
+    formData.append('image', file);
+    formData.append('category', 'product');
+    
+    try {
+        const response = await fetch('/api/upload/image', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to upload image');
+        }
+        
+        const result = await response.json();
+        return result.path || result.url;
+    } catch (error) {
+        console.error('Image upload failed:', error);
+        throw error;
+    }
 };
 
 const loadProducts = async () => {
@@ -112,12 +178,14 @@ const loadProducts = async () => {
 
 const openNew = () => {
     currentProduct.value = null;
+    selectedFile.value = null;
     resetForm();
     dialogVisible.value = true;
 };
 
 const editProduct = (product) => {
     currentProduct.value = product;
+    selectedFile.value = null;
     form.name = product.name || '';
     form.description = product.description || '';
     form.image_path = product.image_path || '';
@@ -134,11 +202,25 @@ const save = async () => {
 
     saving.value = true;
     try {
+        let imagePath = form.image_path;
+        
+        // Upload image if a new file was selected
+        if (selectedFile.value) {
+            imagePath = await uploadImage(selectedFile.value);
+        }
+        
+        const formData = {
+            name: form.name,
+            description: form.description,
+            image_path: imagePath,
+            category: form.category
+        };
+        
         if (currentProduct.value?.id) {
-            await ApiService.updateProduct(currentProduct.value.id, { ...form });
+            await ApiService.updateProduct(currentProduct.value.id, formData);
             success('Product Updated', `"${form.name}" has been updated successfully`);
         } else {
-            await ApiService.createProduct({ ...form });
+            await ApiService.createProduct(formData);
             success('Product Created', `"${form.name}" has been created successfully`);
         }
         await loadProducts();
@@ -152,24 +234,28 @@ const save = async () => {
 };
 
 const confirmDelete = (product) => {
-    confirm.require({
-        message: `Are you sure you want to delete "${product.name}"?`,
-        header: 'Confirm Delete',
-        icon: 'pi pi-exclamation-triangle',
-        rejectClass: 'p-button-secondary p-button-outlined',
-        rejectLabel: 'Cancel',
-        acceptLabel: 'Delete',
-        accept: async () => {
-            try {
-                await ApiService.deleteProduct(product.id);
-                success('Product Deleted', `"${product.name}" has been deleted successfully`);
-                await loadProducts();
-            } catch (e) {
-                console.error('Failed to delete product:', e);
-                error('Delete Failed', 'Failed to delete product. Please try again.');
-            }
-        }
-    });
+    if (deleting.value) return; // Prevent multiple delete operations
+    productToDelete.value = product;
+    deleteDialogVisible.value = true;
+};
+
+const executeDelete = async () => {
+    if (deleting.value || !productToDelete.value) return;
+    
+    deleting.value = true;
+    
+    try {
+        await ApiService.deleteProduct(productToDelete.value.id);
+        success('Product Deleted', `"${productToDelete.value.name}" has been deleted successfully`);
+        await loadProducts();
+        deleteDialogVisible.value = false;
+        productToDelete.value = null;
+    } catch (e) {
+        console.error('Failed to delete product:', e);
+        error('Delete Failed', 'Failed to delete product. Please try again.');
+    } finally {
+        deleting.value = false;
+    }
 };
 
 onMounted(loadProducts);

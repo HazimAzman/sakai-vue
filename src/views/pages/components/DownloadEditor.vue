@@ -15,7 +15,9 @@
                 <template #body="{ data }">
                     <div class="flex gap-2">
                         <Button icon="pi pi-pencil" size="small" @click="editDownload(data)" />
-                        <Button icon="pi pi-trash" size="small" severity="danger" @click="confirmDelete(data)" />
+                        <Button icon="pi pi-trash" size="small" severity="danger" 
+                                :loading="deleting" :disabled="deleting" 
+                                @click="confirmDelete(data)" />
                     </div>
                 </template>
             </Column>
@@ -44,7 +46,19 @@
             </template>
         </Dialog>
 
-        <ConfirmDialog />
+        <!-- Custom Delete Confirmation Dialog -->
+        <Dialog v-model:visible="deleteDialogVisible" :modal="true" header="Confirm Delete" 
+                :style="{ width: '400px' }" class="p-fluid">
+            <div class="flex align-items-center">
+                <i class="pi pi-exclamation-triangle text-orange-500 text-2xl mr-3"></i>
+                <span>Are you sure you want to delete "{{ downloadToDelete?.brand_name }}"?</span>
+            </div>
+            
+            <template #footer>
+                <Button label="Cancel" class="p-button-text" icon="pi pi-times" @click="deleteDialogVisible = false" />
+                <Button label="Delete" icon="pi pi-trash" severity="danger" @click="executeDelete" :loading="deleting" />
+            </template>
+        </Dialog>
     </div>
 </template>
 
@@ -53,21 +67,21 @@ import { useNotifications } from '@/composables/useNotifications.js';
 import { ApiService } from '@/service/ApiService.js';
 import Button from 'primevue/button';
 import Column from 'primevue/column';
-import ConfirmDialog from 'primevue/confirmdialog';
 import DataTable from 'primevue/datatable';
 import Dialog from 'primevue/dialog';
 import InputText from 'primevue/inputtext';
-import { useConfirm } from 'primevue/useconfirm';
 import { onMounted, reactive, ref } from 'vue';
 
-const confirm = useConfirm();
 const { success, error } = useNotifications();
 
 const downloads = ref([]);
 const loading = ref(false);
 const saving = ref(false);
+const deleting = ref(false);
 const dialogVisible = ref(false);
+const deleteDialogVisible = ref(false);
 const currentDownload = ref(null);
+const downloadToDelete = ref(null);
 const form = reactive({ 
     brand_name: '', 
     download_url: ''
@@ -119,7 +133,6 @@ const save = async () => {
         } else {
             await ApiService.createDownload({ ...form });
             success('Success', 'Download created successfully');
-            await ApiService.createDownload({ ...form });
         }
         await loadDownloads();
         dialogVisible.value = false;
@@ -132,24 +145,28 @@ const save = async () => {
 };
 
 const confirmDelete = (download) => {
-    confirm.require({
-        message: `Are you sure you want to delete "${download.brand_name}"?`,
-        header: 'Confirm Delete',
-        icon: 'pi pi-exclamation-triangle',
-        rejectClass: 'p-button-secondary p-button-outlined',
-        rejectLabel: 'Cancel',
-        acceptLabel: 'Delete',
-        accept: async () => {
-            try {
-                await ApiService.deleteDownload(download.id);
-                success('Success', 'Download deleted successfully');
-                await loadDownloads();
-            } catch (e) {
-                console.error('Failed to delete download:', e);
-                error('Error', 'Failed to delete download');
-            }
-        }
-    });
+    if (deleting.value) return; // Prevent multiple delete operations
+    downloadToDelete.value = download;
+    deleteDialogVisible.value = true;
+};
+
+const executeDelete = async () => {
+    if (deleting.value || !downloadToDelete.value) return;
+    
+    deleting.value = true;
+    
+    try {
+        await ApiService.deleteDownload(downloadToDelete.value.id);
+        success('Success', 'Download deleted successfully');
+        await loadDownloads();
+        deleteDialogVisible.value = false;
+        downloadToDelete.value = null;
+    } catch (e) {
+        console.error('Failed to delete download:', e);
+        error('Error', 'Failed to delete download');
+    } finally {
+        deleting.value = false;
+    }
 };
 
 onMounted(loadDownloads);

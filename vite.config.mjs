@@ -24,9 +24,9 @@ export default defineConfig({
     server: {
         proxy: {
           '/api': {
-            target: 'http://localhost/sakai-vue/backend/web',
-            changeOrigin: true
-            // no rewrite — backend expects /api prefix
+            target: 'http://sakai-vue.test/backend/web',
+            changeOrigin: true,
+            rewrite: (path) => path.replace(/^\/api/, '/api')
           }
         }
       }

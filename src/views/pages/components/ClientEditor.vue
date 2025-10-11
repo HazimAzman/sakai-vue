@@ -22,7 +22,9 @@
                 <template #body="{ data }">
                     <div class="flex gap-2">
                         <Button icon="pi pi-pencil" size="small" @click="editClient(data)" />
-                        <Button icon="pi pi-trash" size="small" severity="danger" @click="confirmDelete(data)" />
+                        <Button icon="pi pi-trash" size="small" severity="danger" 
+                                :loading="deleting" :disabled="deleting" 
+                                @click="confirmDelete(data)" />
                     </div>
                 </template>
             </Column>
@@ -43,12 +45,24 @@
             </div>
             
             <div class="field">
-                <label class="mr-4" for="logo_path">Logo Path *</label>
-                <InputText id="logo_path" v-model="form.logo_path" 
-                          placeholder="/images/universiti/example.png"
-                          :class="{ 'p-invalid': !form.logo_path }" />
-                <small v-if="!form.logo_path" class="p-error ml-4">Logo path is required.</small>
-                <small class="text-500 ml-4">Enter the path to the client logo (e.g., /images/universiti/umk.png)</small>
+                <label class="mr-4" for="logo_path">Client Logo *</label>
+                <FileUpload id="logo_path" 
+                           mode="basic" 
+                           name="image" 
+                           accept="image/*" 
+                           :maxFileSize="5000000"
+                           @select="onImageSelect"
+                           :auto="true"
+                           chooseLabel="Choose Logo"
+                           :class="{ 'p-invalid': !form.logo_path }" />
+                <small v-if="!form.logo_path" class="p-error ml-4">Client Logo is required.</small>
+                <small class="text-500 ml-4">Upload a logo for the client (max 5MB)</small>
+                
+                <!-- Preview uploaded image -->
+                <div v-if="form.logo_path" class="mt-3">
+                    <img :src="form.logo_path" :alt="form.name" 
+                         class="w-8rem h-8rem object-cover border-round border-1 border-300" />
+                </div>
             </div>
 
             <template #footer>
@@ -57,28 +71,45 @@
             </template>
         </Dialog>
 
-        <ConfirmDialog />
+        <!-- Custom Delete Confirmation Dialog -->
+        <Dialog v-model:visible="deleteDialogVisible" :modal="true" header="Confirm Delete" 
+                :style="{ width: '400px' }" class="p-fluid">
+            <div class="flex align-items-center">
+                <i class="pi pi-exclamation-triangle text-orange-500 text-2xl mr-3"></i>
+                <span>Are you sure you want to delete "{{ clientToDelete?.name }}"?</span>
+            </div>
+            
+            <template #footer>
+                <Button label="Cancel" class="p-button-text" icon="pi pi-times" @click="deleteDialogVisible = false" />
+                <Button label="Delete" icon="pi pi-trash" severity="danger" @click="executeDelete" :loading="deleting" />
+            </template>
+        </Dialog>
+
     </div>
 </template>
 
 <script setup>
+import { useNotifications } from '@/composables/useNotifications.js';
 import { ApiService } from '@/service/ApiService.js';
 import Button from 'primevue/button';
 import Column from 'primevue/column';
-import ConfirmDialog from 'primevue/confirmdialog';
 import DataTable from 'primevue/datatable';
 import Dialog from 'primevue/dialog';
+import FileUpload from 'primevue/fileupload';
 import InputText from 'primevue/inputtext';
-import { useConfirm } from 'primevue/useconfirm';
 import { onMounted, reactive, ref } from 'vue';
 
-const confirm = useConfirm();
+const { success, error } = useNotifications();
 
 const clients = ref([]);
 const loading = ref(false);
 const saving = ref(false);
+const deleting = ref(false);
 const dialogVisible = ref(false);
+const deleteDialogVisible = ref(false);
 const currentClient = ref(null);
+const clientToDelete = ref(null);
+const selectedFile = ref(null);
 const form = reactive({ 
     name: '', 
     short_name: '', 
@@ -89,6 +120,37 @@ const resetForm = () => {
     form.name = '';
     form.short_name = '';
     form.logo_path = '';
+};
+
+const onImageSelect = (event) => {
+    const file = event.files[0];
+    if (file) {
+        selectedFile.value = file;
+        form.logo_path = URL.createObjectURL(file);
+    }
+};
+
+const uploadImage = async (file) => {
+    const formData = new FormData();
+    formData.append('image', file);
+    formData.append('category', 'clients');
+    
+    try {
+        const response = await fetch('/api/upload/image', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to upload image');
+        }
+        
+        const result = await response.json();
+        return result.path || result.url;
+    } catch (error) {
+        console.error('Image upload failed:', error);
+        throw error;
+    }
 };
 
 const loadClients = async () => {
@@ -106,12 +168,14 @@ const loadClients = async () => {
 
 const openNew = () => {
     currentClient.value = null;
+    selectedFile.value = null;
     resetForm();
     dialogVisible.value = true;
 };
 
 const editClient = (client) => {
     currentClient.value = client;
+    selectedFile.value = null;
     form.name = client.name || '';
     form.short_name = client.short_name || '';
     form.logo_path = client.logo_path || '';
@@ -121,42 +185,65 @@ const editClient = (client) => {
 const save = async () => {
     // Validate form
     if (!form.name || !form.short_name || !form.logo_path) {
+        error('Validation Error', 'Please fill in all required fields');
         return;
     }
 
     saving.value = true;
     try {
+        let logoPath = form.logo_path;
+        
+        // Upload image if a new file was selected
+        if (selectedFile.value) {
+            logoPath = await uploadImage(selectedFile.value);
+        }
+        
+        const formData = {
+            name: form.name,
+            short_name: form.short_name,
+            logo_path: logoPath
+        };
+        
         if (currentClient.value?.id) {
-            await ApiService.updateClient(currentClient.value.id, { ...form });
+            await ApiService.updateClient(currentClient.value.id, formData);
+            success('Success', 'Client updated successfully');
         } else {
-            await ApiService.createClient({ ...form });
+            await ApiService.createClient(formData);
+            success('Success', 'Client created successfully');
         }
         await loadClients();
         dialogVisible.value = false;
     } catch (e) {
         console.error('Failed to save client:', e);
+        error('Error', 'Failed to save client');
     } finally {
         saving.value = false;
     }
 };
 
 const confirmDelete = (client) => {
-    confirm.require({
-        message: `Are you sure you want to delete "${client.name}"?`,
-        header: 'Confirm Delete',
-        icon: 'pi pi-exclamation-triangle',
-        rejectClass: 'p-button-secondary p-button-outlined',
-        rejectLabel: 'Cancel',
-        acceptLabel: 'Delete',
-        accept: async () => {
-            try {
-                await ApiService.deleteClient(client.id);
-                await loadClients();
-            } catch (e) {
-                console.error('Failed to delete client:', e);
-            }
-        }
-    });
+    if (deleting.value) return; // Prevent multiple delete operations
+    clientToDelete.value = client;
+    deleteDialogVisible.value = true;
+};
+
+const executeDelete = async () => {
+    if (deleting.value || !clientToDelete.value) return;
+    
+    deleting.value = true;
+    
+    try {
+        await ApiService.deleteClient(clientToDelete.value.id);
+        success('Success', 'Client deleted successfully');
+        await loadClients();
+        deleteDialogVisible.value = false;
+        clientToDelete.value = null;
+    } catch (e) {
+        console.error('Failed to delete client:', e);
+        error('Error', 'Failed to delete client');
+    } finally {
+        deleting.value = false;
+    }
 };
 
 onMounted(loadClients);

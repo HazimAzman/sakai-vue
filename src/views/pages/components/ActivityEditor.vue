@@ -36,26 +36,38 @@
 
         <Dialog v-model:visible="dialogVisible" :modal="true" :header="currentActivity?.id ? 'Edit Activity' : 'Add Activity'" 
                 :style="{ width: '700px' }" class="p-fluid">
-            <div class="field">
+            <div class="field mb-3">
                 <label class="mr-4" for="title">Title *</label>
                 <InputText id="title" v-model="form.title" :class="{ 'p-invalid': !form.title }" />
                 <small v-if="!form.title" class="p-error ml-4">Title is required.</small>
             </div>
             
-            <div class="field">
+            <div class="field mb-3">
                 <label class="mr-4" for="description">Description *</label>
                 <Textarea id="description" v-model="form.description" rows="4" 
                          :class="{ 'p-invalid': !form.description }" />
                 <small v-if="!form.description" class="p-error ml-4">Description is required.</small>
             </div>
             
-            <div class="field">
-                <label class="mr-4" for="image_path">Image Path *</label>
-                <InputText id="image_path" v-model="form.image_path" 
-                          placeholder="/images/activities/example.jpg"
-                          :class="{ 'p-invalid': !form.image_path }" />
-                <small v-if="!form.image_path" class="p-error ml-4">Image path is required.</small>
-                <small class="text-500 ml-4">Enter the path to the activity image (e.g., /images/activities/laboratory-equipment.jpg)</small>
+            <div class="field mb-3">
+                <label class="mr-4" for="image">Activity Image *</label>
+                <FileUpload id="image" 
+                           mode="basic" 
+                           name="image" 
+                           accept="image/*" 
+                           :maxFileSize="5000000"
+                           @select="onImageSelect"
+                           :auto="true"
+                           chooseLabel="Choose Image"
+                           :class="{ 'p-invalid': !form.image_path }" />
+                <small v-if="!form.image_path" class="p-error ml-4">Image is required.</small>
+                <small class="text-500 ml-4">Upload an image for this activity (max 5MB)</small>
+                
+                <!-- Preview uploaded image -->
+                <div v-if="form.image_path" class="mt-3">
+                    <img :src="form.image_path" :alt="form.title" 
+                         class="w-8rem h-8rem object-cover border-round border-1 border-300" />
+                </div>
             </div>
 
             <template #footer>
@@ -80,6 +92,7 @@
 <script setup>
 import { useNotifications } from '@/composables/useNotifications.js';
 import { ApiService } from '@/service/ApiService.js';
+import FileUpload from 'primevue/fileupload';
 import { onMounted, ref } from 'vue';
 
 const { success: showSuccess, error: showError } = useNotifications();
@@ -98,6 +111,17 @@ const form = ref({
     image_path: ''
 });
 
+const selectedFile = ref(null);
+
+const onImageSelect = (event) => {
+    const file = event.files[0];
+    if (file) {
+        selectedFile.value = file;
+        // Create a preview URL for the selected image
+        form.value.image_path = URL.createObjectURL(file);
+    }
+};
+
 const loadActivities = async () => {
     try {
         loading.value = true;
@@ -113,6 +137,7 @@ const loadActivities = async () => {
 
 const openNew = () => {
     currentActivity.value = null;
+    selectedFile.value = null;
     form.value = {
         title: '',
         description: '',
@@ -123,12 +148,35 @@ const openNew = () => {
 
 const editActivity = (activity) => {
     currentActivity.value = activity;
+    selectedFile.value = null;
     form.value = {
         title: activity.title,
         description: activity.description,
         image_path: activity.image_path
     };
     dialogVisible.value = true;
+};
+
+const uploadImage = async (file) => {
+    const formData = new FormData();
+    formData.append('image', file);
+    
+    try {
+        const response = await fetch('/api/upload/image', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to upload image');
+        }
+        
+        const result = await response.json();
+        return result.path || result.url;
+    } catch (error) {
+        console.error('Image upload failed:', error);
+        throw error;
+    }
 };
 
 const save = async () => {
@@ -140,13 +188,26 @@ const save = async () => {
     try {
         saving.value = true;
         
+        let imagePath = form.value.image_path;
+        
+        // If a new file was selected, upload it first
+        if (selectedFile.value) {
+            imagePath = await uploadImage(selectedFile.value);
+        }
+        
+        const activityData = {
+            title: form.value.title,
+            description: form.value.description,
+            image_path: imagePath
+        };
+        
         if (currentActivity.value?.id) {
             // Update existing activity
-            await ApiService.updateActivity(currentActivity.value.id, form.value);
+            await ApiService.updateActivity(currentActivity.value.id, activityData);
             showSuccess('Success', 'Activity updated successfully');
         } else {
             // Create new activity
-            await ApiService.createActivity(form.value);
+            await ApiService.createActivity(activityData);
             showSuccess('Success', 'Activity created successfully');
         }
         

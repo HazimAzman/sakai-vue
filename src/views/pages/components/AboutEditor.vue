@@ -23,7 +23,9 @@
                 <template #body="{ data }">
                     <div class="flex gap-2">
                         <Button icon="pi pi-pencil" size="small" @click="editAbout(data)" />
-                        <Button icon="pi pi-trash" size="small" severity="danger" @click="confirmDelete(data)" />
+                        <Button icon="pi pi-trash" size="small" severity="danger" 
+                                :loading="deleting" :disabled="deleting" 
+                                @click="confirmDelete(data)" />
                     </div>
                 </template>
             </Column>
@@ -57,12 +59,24 @@
             </div>
             
             <div class="field">
-                <label class="mr-4" for="ceo_image">CEO Image Path *</label>
-                <InputText id="ceo_image" v-model="form.ceo_image" 
-                          placeholder="/images/about/ceo-name.png"
-                          :class="{ 'p-invalid': !form.ceo_image }" />
-                <small v-if="!form.ceo_image" class="p-error ml-4">CEO Image path is required.</small>
-                <small class="text-500">Enter the path to the CEO image (e.g., /images/about/azman-yunus.png)</small>
+                <label class="mr-4" for="ceo_image">CEO Image *</label>
+                <FileUpload id="ceo_image" 
+                           mode="basic" 
+                           name="image" 
+                           accept="image/*" 
+                           :maxFileSize="5000000"
+                           @select="onImageSelect"
+                           :auto="true"
+                           chooseLabel="Choose CEO Image"
+                           :class="{ 'p-invalid': !form.ceo_image }" />
+                <small v-if="!form.ceo_image" class="p-error ml-4">CEO Image is required.</small>
+                <small class="text-500 ml-4">Upload an image for the CEO (max 5MB)</small>
+                
+                <!-- Preview uploaded image -->
+                <div v-if="form.ceo_image" class="mt-3">
+                    <img :src="form.ceo_image" :alt="form.ceo_name" 
+                         class="w-8rem h-8rem object-cover border-round border-1 border-300" />
+                </div>
             </div>
 
             <template #footer>
@@ -71,7 +85,19 @@
             </template>
         </Dialog>
 
-        <ConfirmDialog />
+        <!-- Custom Delete Confirmation Dialog -->
+        <Dialog v-model:visible="deleteDialogVisible" :modal="true" header="Confirm Delete" 
+                :style="{ width: '400px' }" class="p-fluid">
+            <div class="flex align-items-center">
+                <i class="pi pi-exclamation-triangle text-orange-500 text-2xl mr-3"></i>
+                <span>Are you sure you want to delete "{{ aboutToDelete?.title }}"?</span>
+            </div>
+            
+            <template #footer>
+                <Button label="Cancel" class="p-button-text" icon="pi pi-times" @click="deleteDialogVisible = false" />
+                <Button label="Delete" icon="pi pi-trash" severity="danger" @click="executeDelete" :loading="deleting" />
+            </template>
+        </Dialog>
     </div>
 </template>
 
@@ -80,22 +106,24 @@ import { useNotifications } from '@/composables/useNotifications.js';
 import { ApiService } from '@/service/ApiService.js';
 import Button from 'primevue/button';
 import Column from 'primevue/column';
-import ConfirmDialog from 'primevue/confirmdialog';
 import DataTable from 'primevue/datatable';
 import Dialog from 'primevue/dialog';
+import FileUpload from 'primevue/fileupload';
 import InputText from 'primevue/inputtext';
 import Textarea from 'primevue/textarea';
-import { useConfirm } from 'primevue/useconfirm';
 import { onMounted, reactive, ref } from 'vue';
 
-const confirm = useConfirm();
 const { success, error } = useNotifications();
 
 const aboutEntries = ref([]);
 const loading = ref(false);
 const saving = ref(false);
+const deleting = ref(false);
 const dialogVisible = ref(false);
+const deleteDialogVisible = ref(false);
 const currentAbout = ref(null);
+const aboutToDelete = ref(null);
+const selectedFile = ref(null);
 const form = reactive({ 
     title: '', 
     content: '', 
@@ -110,6 +138,37 @@ const resetForm = () => {
     form.ceo_name = '';
     form.ceo_title = '';
     form.ceo_image = '';
+};
+
+const onImageSelect = (event) => {
+    const file = event.files[0];
+    if (file) {
+        selectedFile.value = file;
+        form.ceo_image = URL.createObjectURL(file);
+    }
+};
+
+const uploadImage = async (file) => {
+    const formData = new FormData();
+    formData.append('image', file);
+    formData.append('category', 'about');
+    
+    try {
+        const response = await fetch('/api/upload/image', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to upload image');
+        }
+        
+        const result = await response.json();
+        return result.path || result.url;
+    } catch (error) {
+        console.error('Image upload failed:', error);
+        throw error;
+    }
 };
 
 const loadAbout = async () => {
@@ -127,12 +186,14 @@ const loadAbout = async () => {
 
 const openNew = () => {
     currentAbout.value = null;
+    selectedFile.value = null;
     resetForm();
     dialogVisible.value = true;
 };
 
 const editAbout = (about) => {
     currentAbout.value = about;
+    selectedFile.value = null;
     form.title = about.title || '';
     form.content = about.content || '';
     form.ceo_name = about.ceo_name || '';
@@ -150,11 +211,26 @@ const save = async () => {
 
     saving.value = true;
     try {
+        let imagePath = form.ceo_image;
+        
+        // Upload image if a new file was selected
+        if (selectedFile.value) {
+            imagePath = await uploadImage(selectedFile.value);
+        }
+        
+        const formData = {
+            title: form.title,
+            content: form.content,
+            ceo_name: form.ceo_name,
+            ceo_title: form.ceo_title,
+            ceo_image: imagePath
+        };
+        
         if (currentAbout.value?.id) {
-            await ApiService.updateAbout(currentAbout.value.id, { ...form });
+            await ApiService.updateAbout(currentAbout.value.id, formData);
             success('Success', 'About entry updated successfully');
         } else {
-            await ApiService.createAbout({ ...form });
+            await ApiService.createAbout(formData);
             success('Success', 'About entry created successfully');
         }
         await loadAbout();
@@ -168,24 +244,28 @@ const save = async () => {
 };
 
 const confirmDelete = (about) => {
-    confirm.require({
-        message: `Are you sure you want to delete "${about.title}"?`,
-        header: 'Confirm Delete',
-        icon: 'pi pi-exclamation-triangle',
-        rejectClass: 'p-button-secondary p-button-outlined',
-        rejectLabel: 'Cancel',
-        acceptLabel: 'Delete',
-        accept: async () => {
-            try {
-                await ApiService.deleteAbout(about.id);
-                success('Success', 'About entry deleted successfully');
-                await loadAbout();
-            } catch (e) {
-                console.error('Failed to delete about entry:', e);
-                error('Error', 'Failed to delete about entry');
-            }
-        }
-    });
+    if (deleting.value) return; // Prevent multiple delete operations
+    aboutToDelete.value = about;
+    deleteDialogVisible.value = true;
+};
+
+const executeDelete = async () => {
+    if (deleting.value || !aboutToDelete.value) return;
+    
+    deleting.value = true;
+    
+    try {
+        await ApiService.deleteAbout(aboutToDelete.value.id);
+        success('Success', 'About entry deleted successfully');
+        await loadAbout();
+        deleteDialogVisible.value = false;
+        aboutToDelete.value = null;
+    } catch (e) {
+        console.error('Failed to delete about entry:', e);
+        error('Error', 'Failed to delete about entry');
+    } finally {
+        deleting.value = false;
+    }
 };
 
 onMounted(loadAbout);

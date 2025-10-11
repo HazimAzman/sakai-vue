@@ -22,7 +22,9 @@
                 <template #body="{ data }">
                     <div class="flex gap-2">
                         <Button icon="pi pi-pencil" size="small" @click="editService(data)" />
-                        <Button icon="pi pi-trash" size="small" severity="danger" @click="confirmDelete(data)" />
+                        <Button icon="pi pi-trash" size="small" severity="danger" 
+                                :loading="deleting" :disabled="deleting" 
+                                @click="confirmDelete(data)" />
                     </div>
                 </template>
             </Column>
@@ -44,12 +46,24 @@
             </div>
             
             <div class="mb-3 field">
-                <label class="mr-3" for="image_path">Image Path *</label>
-                <InputText id="image_path" v-model="form.image_path" 
-                          placeholder="/images/service/example.png"
-                          :class="{ 'p-invalid': !form.image_path }" />
-                <small v-if="!form.image_path" class="ml-3 p-error">Image path is required.</small>
-                <small class="ml-3 text-500">Enter the path to the service image (e.g., /images/service/lab-scientific-equipments-supply.png)</small>
+                <label class="mr-3" for="image_path">Service Image *</label>
+                <FileUpload id="image_path" 
+                           mode="basic" 
+                           name="image" 
+                           accept="image/*" 
+                           :maxFileSize="5000000"
+                           @select="onImageSelect"
+                           :auto="true"
+                           chooseLabel="Choose Image"
+                           :class="{ 'p-invalid': !form.image_path }" />
+                <small v-if="!form.image_path" class="ml-3 p-error">Service Image is required.</small>
+                <small class="ml-3 text-500">Upload an image for the service (max 5MB)</small>
+                
+                <!-- Preview uploaded image -->
+                <div v-if="form.image_path" class="mt-3">
+                    <img :src="form.image_path" :alt="form.title" 
+                         class="w-8rem h-8rem object-cover border-round border-1 border-300" />
+                </div>
             </div>
 
             <template #footer>
@@ -58,7 +72,19 @@
             </template>
         </Dialog>
 
-        <ConfirmDialog />
+        <!-- Custom Delete Confirmation Dialog -->
+        <Dialog v-model:visible="deleteDialogVisible" :modal="true" header="Confirm Delete" 
+                :style="{ width: '400px' }" class="p-fluid">
+            <div class="flex align-items-center">
+                <i class="pi pi-exclamation-triangle text-orange-500 text-2xl mr-3"></i>
+                <span>Are you sure you want to delete "{{ serviceToDelete?.title }}"?</span>
+            </div>
+            
+            <template #footer>
+                <Button label="Cancel" class="p-button-text" icon="pi pi-times" @click="deleteDialogVisible = false" />
+                <Button label="Delete" icon="pi pi-trash" severity="danger" @click="executeDelete" :loading="deleting" />
+            </template>
+        </Dialog>
     </div>
 </template>
 
@@ -67,22 +93,24 @@ import { useNotifications } from '@/composables/useNotifications.js';
 import { ApiService } from '@/service/ApiService.js';
 import Button from 'primevue/button';
 import Column from 'primevue/column';
-import ConfirmDialog from 'primevue/confirmdialog';
 import DataTable from 'primevue/datatable';
 import Dialog from 'primevue/dialog';
+import FileUpload from 'primevue/fileupload';
 import InputText from 'primevue/inputtext';
 import Textarea from 'primevue/textarea';
-import { useConfirm } from 'primevue/useconfirm';
 import { onMounted, reactive, ref } from 'vue';
 
-const confirm = useConfirm();
 const { success, error } = useNotifications();
 
 const services = ref([]);
 const loading = ref(false);
 const saving = ref(false);
+const deleting = ref(false);
 const dialogVisible = ref(false);
+const deleteDialogVisible = ref(false);
 const currentService = ref(null);
+const serviceToDelete = ref(null);
+const selectedFile = ref(null);
 const form = reactive({ 
     title: '', 
     description: '', 
@@ -93,6 +121,37 @@ const resetForm = () => {
     form.title = '';
     form.description = '';
     form.image_path = '';
+};
+
+const onImageSelect = (event) => {
+    const file = event.files[0];
+    if (file) {
+        selectedFile.value = file;
+        form.image_path = URL.createObjectURL(file);
+    }
+};
+
+const uploadImage = async (file) => {
+    const formData = new FormData();
+    formData.append('image', file);
+    formData.append('category', 'service');
+    
+    try {
+        const response = await fetch('/api/upload/image', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to upload image');
+        }
+        
+        const result = await response.json();
+        return result.path || result.url;
+    } catch (error) {
+        console.error('Image upload failed:', error);
+        throw error;
+    }
 };
 
 const loadServices = async () => {
@@ -110,12 +169,14 @@ const loadServices = async () => {
 
 const openNew = () => {
     currentService.value = null;
+    selectedFile.value = null;
     resetForm();
     dialogVisible.value = true;
 };
 
 const editService = (service) => {
     currentService.value = service;
+    selectedFile.value = null;
     form.title = service.title || '';
     form.description = service.description || '';
     form.image_path = service.image_path || '';
@@ -131,11 +192,24 @@ const save = async () => {
 
     saving.value = true;
     try {
+        let imagePath = form.image_path;
+        
+        // Upload image if a new file was selected
+        if (selectedFile.value) {
+            imagePath = await uploadImage(selectedFile.value);
+        }
+        
+        const formData = {
+            title: form.title,
+            description: form.description,
+            image_path: imagePath
+        };
+        
         if (currentService.value?.id) {
-            await ApiService.updateService(currentService.value.id, { ...form });
+            await ApiService.updateService(currentService.value.id, formData);
             success('Success', 'Service updated successfully');
         } else {
-            await ApiService.createService({ ...form });
+            await ApiService.createService(formData);
             success('Success', 'Service created successfully');
         }
         await loadServices();
@@ -149,24 +223,28 @@ const save = async () => {
 };
 
 const confirmDelete = (service) => {
-    confirm.require({
-        message: `Are you sure you want to delete "${service.title}"?`,
-        header: 'Confirm Delete',
-        icon: 'pi pi-exclamation-triangle',
-        rejectClass: 'p-button-secondary p-button-outlined',
-        rejectLabel: 'Cancel',
-        acceptLabel: 'Delete',
-        accept: async () => {
-            try {
-                await ApiService.deleteService(service.id);
-                success('Success', 'Service deleted successfully');
-                await loadServices();
-            } catch (e) {
-                console.error('Failed to delete service:', e);
-                error('Error', 'Failed to delete service');
-            }
-        }
-    });
+    if (deleting.value) return; // Prevent multiple delete operations
+    serviceToDelete.value = service;
+    deleteDialogVisible.value = true;
+};
+
+const executeDelete = async () => {
+    if (deleting.value || !serviceToDelete.value) return;
+    
+    deleting.value = true;
+    
+    try {
+        await ApiService.deleteService(serviceToDelete.value.id);
+        success('Success', 'Service deleted successfully');
+        await loadServices();
+        deleteDialogVisible.value = false;
+        serviceToDelete.value = null;
+    } catch (e) {
+        console.error('Failed to delete service:', e);
+        error('Error', 'Failed to delete service');
+    } finally {
+        deleting.value = false;
+    }
 };
 
 onMounted(loadServices);

@@ -37,10 +37,24 @@
             </div>
             
             <div class="mb-3 field">
-                <label class="mr-4" for="image_path">Image Path *</label>
-                <InputText id="image_path" v-model="form.image_path" :class="{ 'p-invalid': !form.image_path }" />
-                <small v-if="!form.image_path" class="p-error ml-4">Image path is required.</small>
-                <small class="text-500 ml-4">Enter the path to the institute logo image (e.g., /images/institut/example.png)</small>
+                <label class="mr-4" for="image_path">Institute Logo *</label>
+                <FileUpload id="image_path" 
+                           mode="basic" 
+                           name="image" 
+                           accept="image/*" 
+                           :maxFileSize="5000000"
+                           @select="onImageSelect"
+                           :auto="true"
+                           chooseLabel="Choose Logo"
+                           :class="{ 'p-invalid': !form.image_path }" />
+                <small v-if="!form.image_path" class="p-error ml-4">Institute Logo is required.</small>
+                <small class="text-500 ml-4">Upload a logo for the institute (max 5MB)</small>
+                
+                <!-- Preview uploaded image -->
+                <div v-if="form.image_path" class="mt-3">
+                    <img :src="form.image_path" :alt="form.name" 
+                         class="w-8rem h-8rem object-cover border-round border-1 border-300" />
+                </div>
             </div>
 
             <template #footer>
@@ -65,6 +79,7 @@
 <script setup>
 import { useNotifications } from '@/composables/useNotifications.js';
 import { ApiService } from '@/service/ApiService.js';
+import FileUpload from 'primevue/fileupload';
 import { onMounted, ref } from 'vue';
 
 const { success: showSuccess, error: showError } = useNotifications();
@@ -76,12 +91,44 @@ const deleting = ref(false);
 const dialogVisible = ref(false);
 const deleteDialogVisible = ref(false);
 const currentInstitute = ref(null);
+const selectedFile = ref(null);
 
 const form = ref({
     name: '',
     abbreviation: '',
     image_path: ''
 });
+
+const onImageSelect = (event) => {
+    const file = event.files[0];
+    if (file) {
+        selectedFile.value = file;
+        form.value.image_path = URL.createObjectURL(file);
+    }
+};
+
+const uploadImage = async (file) => {
+    const formData = new FormData();
+    formData.append('image', file);
+    formData.append('category', 'institut');
+    
+    try {
+        const response = await fetch('/api/upload/image', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to upload image');
+        }
+        
+        const result = await response.json();
+        return result.path || result.url;
+    } catch (error) {
+        console.error('Image upload failed:', error);
+        throw error;
+    }
+};
 
 const loadInstitutes = async () => {
     try {
@@ -98,6 +145,7 @@ const loadInstitutes = async () => {
 
 const openNew = () => {
     currentInstitute.value = null;
+    selectedFile.value = null;
     form.value = {
         name: '',
         abbreviation: '',
@@ -108,6 +156,7 @@ const openNew = () => {
 
 const editInstitute = (institute) => {
     currentInstitute.value = institute;
+    selectedFile.value = null;
     form.value = {
         name: institute.name,
         abbreviation: institute.abbreviation,
@@ -125,13 +174,26 @@ const save = async () => {
     try {
         saving.value = true;
         
+        let imagePath = form.value.image_path;
+        
+        // Upload image if a new file was selected
+        if (selectedFile.value) {
+            imagePath = await uploadImage(selectedFile.value);
+        }
+        
+        const formData = {
+            name: form.value.name,
+            abbreviation: form.value.abbreviation,
+            image_path: imagePath
+        };
+        
         if (currentInstitute.value?.id) {
             // Update existing institute
-            await ApiService.updateInstitute(currentInstitute.value.id, form.value);
+            await ApiService.updateInstitute(currentInstitute.value.id, formData);
             showSuccess('Success', 'Institute updated successfully');
         } else {
             // Create new institute
-            await ApiService.createInstitute(form.value);
+            await ApiService.createInstitute(formData);
             showSuccess('Success', 'Institute created successfully');
         }
         

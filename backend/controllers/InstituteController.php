@@ -186,10 +186,40 @@ class InstituteController extends ActiveController
             throw new \yii\web\NotFoundHttpException('Institute not found');
         }
         
+        // Store the image path before deleting the model
+        $imagePath = $model->image_path;
+        
         if ($model->delete()) {
+            // Delete the associated image file if it exists
+            if ($imagePath) {
+                $this->deleteImageFile($imagePath);
+            }
+            
             return ['message' => 'Institute deleted successfully'];
         } else {
             return ['error' => 'Failed to delete institute'];
+        }
+    }
+    
+    /**
+     * Delete image file from public directory
+     */
+    private function deleteImageFile($imagePath)
+    {
+        // Remove leading slash if present
+        $imagePath = ltrim($imagePath, '/');
+        
+        // Construct full file path
+        $fullPath = dirname(Yii::getAlias('@app')) . '/public/' . $imagePath;
+        
+        // Check if file exists and delete it
+        if (file_exists($fullPath) && is_file($fullPath)) {
+            try {
+                unlink($fullPath);
+                Yii::info("Deleted image file: {$fullPath}", __METHOD__);
+            } catch (\Exception $e) {
+                Yii::error("Failed to delete image file {$fullPath}: " . $e->getMessage(), __METHOD__);
+            }
         }
     }
 }
