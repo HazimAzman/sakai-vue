@@ -180,40 +180,10 @@ class ClientController extends ActiveController
             throw new \yii\web\NotFoundHttpException('Client not found');
         }
         
-        // Store the logo path before deleting the model
-        $logoPath = $model->logo_path;
-        
         if ($model->delete()) {
-            // Delete the associated image file if it exists
-            if ($logoPath) {
-                $this->deleteImageFile($logoPath);
-            }
-            
             return ['message' => 'Client deleted successfully'];
         } else {
             return ['error' => 'Failed to delete client'];
-        }
-    }
-    
-    /**
-     * Delete image file from public directory
-     */
-    private function deleteImageFile($imagePath)
-    {
-        // Remove leading slash if present
-        $imagePath = ltrim($imagePath, '/');
-        
-        // Construct full file path
-        $fullPath = dirname(Yii::getAlias('@app')) . '/public/' . $imagePath;
-        
-        // Check if file exists and delete it
-        if (file_exists($fullPath) && is_file($fullPath)) {
-            try {
-                unlink($fullPath);
-                Yii::info("Deleted image file: {$fullPath}", __METHOD__);
-            } catch (\Exception $e) {
-                Yii::error("Failed to delete image file {$fullPath}: " . $e->getMessage(), __METHOD__);
-            }
         }
     }
 }

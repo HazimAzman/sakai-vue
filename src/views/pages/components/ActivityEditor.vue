@@ -160,6 +160,7 @@ const editActivity = (activity) => {
 const uploadImage = async (file) => {
     const formData = new FormData();
     formData.append('image', file);
+    formData.append('category', 'activities');
     
     try {
         const response = await fetch('/api/upload/image', {
@@ -172,7 +173,7 @@ const uploadImage = async (file) => {
         }
         
         const result = await response.json();
-        return result.path || result.url;
+        return result.data?.path || result.path || result.url;
     } catch (error) {
         console.error('Image upload failed:', error);
         throw error;

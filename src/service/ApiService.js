@@ -1,7 +1,7 @@
 // API Service for communicating with Yii2 backend
 // Prefer Vite env base URL when available; default to relative '/api' via dev proxy
 const ENV_BASE = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE_URL) ? String(import.meta.env.VITE_API_BASE_URL).replace(/\/$/, '') : '';
-const API_BASE_URL = ENV_BASE || '';
+const API_BASE_URL = 'http://localhost/sakai-vue/backend/web' || '';
 
 function authHeaders() {
     try {

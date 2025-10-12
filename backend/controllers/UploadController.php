@@ -10,7 +10,6 @@ use yii\filters\ContentNegotiator;
 use yii\filters\VerbFilter;
 use yii\web\BadRequestHttpException;
 use yii\web\UploadedFile;
-use yii\web\UnauthorizedHttpException;
 
 class UploadController extends Controller
 {
@@ -22,7 +21,7 @@ class UploadController extends Controller
         $behaviors['corsFilter'] = [
             'class' => Cors::class,
             'cors' => [
-                'Origin' => ['http://localhost:3000', 'http://127.0.0.1:3000', 'http://localhost:5173', 'http://127.0.0.1:5173'],
+                'Origin' => $this->getCorsOrigins(),
                 'Access-Control-Request-Method' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'],
                 'Access-Control-Request-Headers' => ['*'],
                 'Access-Control-Allow-Credentials' => true,
@@ -42,7 +41,7 @@ class UploadController extends Controller
         $behaviors['verbFilter'] = [
             'class' => VerbFilter::class,
             'actions' => [
-                'image' => ['POST'],
+                'image' => ['POST', 'OPTIONS'],
             ],
         ];
 
@@ -54,7 +53,11 @@ class UploadController extends Controller
     {
         // Set CORS headers for all requests
         $response = Yii::$app->response;
-        $response->headers->set('Access-Control-Allow-Origin', 'http://localhost:5173');
+        $allowedOrigins = $this->getCorsOrigins();
+        $origin = Yii::$app->request->headers->get('Origin');
+        if ($origin && in_array($origin, $allowedOrigins)) {
+            $response->headers->set('Access-Control-Allow-Origin', $origin);
+        }
         $response->headers->set('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS');
         $response->headers->set('Access-Control-Allow-Headers', '*');
         $response->headers->set('Access-Control-Allow-Credentials', 'true');
@@ -69,74 +72,120 @@ class UploadController extends Controller
         return parent::beforeAction($action);
     }
 
+    private function getCorsOrigins()
+    {
+        require_once Yii::getAlias('@app/config/env.php');
+        $origins = \EnvConfig::get('CORS_ORIGINS', 'http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173');
+        return explode(',', $origins);
+    }
+
+    public function actions()
+    {
+        $actions = parent::actions();
+        
+        // Remove default actions that we want to override
+        unset($actions['index'], $actions['view'], $actions['create'], $actions['update'], $actions['delete']);
+
+        return $actions;
+    }
+
     /**
      * Upload image file
      */
     public function actionImage()
     {
-        $uploadedFile = UploadedFile::getInstanceByName('image');
-        
-        if (!$uploadedFile) {
-            throw new BadRequestHttpException('No image file provided');
-        }
+        try {
+            // Debug: Log request method and content type
+            Yii::info('Upload request method: ' . Yii::$app->request->method, 'upload');
+            Yii::info('Content type: ' . Yii::$app->request->getContentType(), 'upload');
+            Yii::info('POST data: ' . print_r($_POST, true), 'upload');
+            Yii::info('FILES data: ' . print_r($_FILES, true), 'upload');
 
-        // Validate file type
-        $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-        if (!in_array($uploadedFile->type, $allowedTypes)) {
-            throw new BadRequestHttpException('Invalid file type. Only JPEG, PNG, GIF, and WebP images are allowed.');
-        }
+            // Get category from request (default to 'activities' for backward compatibility)
+            $category = Yii::$app->request->post('category', 'activities');
+            $allowedCategories = ['activities', 'about', 'clients', 'institut', 'service', 'product'];
+            
+            if (!in_array($category, $allowedCategories)) {
+                throw new BadRequestHttpException('Invalid category. Allowed categories: ' . implode(', ', $allowedCategories));
+            }
 
-        // Validate file size (5MB max)
-        $maxSize = 5 * 1024 * 1024; // 5MB in bytes
-        if ($uploadedFile->size > $maxSize) {
-            throw new BadRequestHttpException('File size too large. Maximum size is 5MB.');
-        }
+            // Check if file was uploaded
+            if (!isset($_FILES['image']) || $_FILES['image']['error'] !== UPLOAD_ERR_OK) {
+                $errorMsg = 'No image file uploaded or upload error';
+                if (isset($_FILES['image']['error'])) {
+                    $errorMsg .= ' (Error code: ' . $_FILES['image']['error'] . ')';
+                }
+                throw new BadRequestHttpException($errorMsg);
+            }
 
-        // Get category from request (default to 'activities' for backward compatibility)
-        $category = Yii::$app->request->post('category', 'activities');
-        $allowedCategories = ['activities', 'about', 'clients', 'institut', 'service', 'product'];
-        
-        if (!in_array($category, $allowedCategories)) {
-            throw new BadRequestHttpException('Invalid category. Allowed categories: ' . implode(', ', $allowedCategories));
-        }
+            $file = $_FILES['image'];
+            
+            // Validate file type
+            $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+            $fileType = $file['type'];
+            if (!in_array($fileType, $allowedTypes)) {
+                throw new BadRequestHttpException('Invalid file type. Allowed types: ' . implode(', ', $allowedTypes) . '. Got: ' . $fileType);
+            }
 
-        // Create upload directory if it doesn't exist
-        // Store in the main project's public folder (not backend's public folder)
-        $uploadDir = dirname(Yii::getAlias('@app')) . '/public/images/' . $category . '/';
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0755, true);
-        }
+            // Validate file size (5MB max)
+            $maxSize = 5 * 1024 * 1024; // 5MB
+            if ($file['size'] > $maxSize) {
+                throw new BadRequestHttpException('File too large. Maximum size: 5MB');
+            }
 
-        // Generate unique filename
-        $extension = $uploadedFile->extension;
-        $filename = uniqid() . '_' . time() . '.' . $extension;
-        $filePath = $uploadDir . $filename;
+            // Create upload directory
+            $uploadDir = dirname(Yii::getAlias('@app')) . '/public/images/' . $category . '/';
+            
+            if (!is_dir($uploadDir)) {
+                if (!mkdir($uploadDir, 0755, true)) {
+                    throw new BadRequestHttpException('Failed to create upload directory: ' . $uploadDir);
+                }
+            }
 
-        // Save the file
-        if ($uploadedFile->saveAs($filePath)) {
-            // Return the relative URL path without /public/ prefix for Vite
+            if (!is_writable($uploadDir)) {
+                throw new BadRequestHttpException('Upload directory is not writable: ' . $uploadDir);
+            }
+
+            // Generate unique filename
+            $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+            $filename = uniqid() . '_' . time() . '.' . $extension;
+            $filePath = $uploadDir . $filename;
+
+            // Save file using move_uploaded_file
+            if (!move_uploaded_file($file['tmp_name'], $filePath)) {
+                Yii::error('Failed to save uploaded file', 'upload');
+                Yii::error('Directory exists: ' . (is_dir($uploadDir) ? 'yes' : 'no'), 'upload');
+                Yii::error('Directory writable: ' . (is_writable($uploadDir) ? 'yes' : 'no'), 'upload');
+                Yii::error('File path: ' . $filePath, 'upload');
+                Yii::error('Source file: ' . $file['tmp_name'], 'upload');
+                throw new BadRequestHttpException('Failed to save uploaded file');
+            }
+
+            // Return success response with file path
             $relativePath = '/images/' . $category . '/' . $filename;
             
             return [
                 'success' => true,
                 'message' => 'Image uploaded successfully',
-                'path' => $relativePath,
-                'url' => $relativePath, // For compatibility
-                'filename' => $filename,
-                'size' => $uploadedFile->size,
-                'type' => $uploadedFile->type,
-                'category' => $category
+                'data' => [
+                    'filename' => $filename,
+                    'path' => $relativePath,
+                    'full_path' => $filePath,
+                    'size' => $file['size'],
+                    'type' => $fileType,
+                    'category' => $category
+                ]
             ];
-        } else {
-            // Log detailed error information
-            $error = error_get_last();
-            Yii::error('File upload failed: ' . ($error['message'] ?? 'Unknown error'), __METHOD__);
-            Yii::error('Upload directory: ' . $uploadDir, __METHOD__);
-            Yii::error('File path: ' . $filePath, __METHOD__);
-            Yii::error('Directory exists: ' . (is_dir($uploadDir) ? 'yes' : 'no'), __METHOD__);
-            Yii::error('Directory writable: ' . (is_writable($uploadDir) ? 'yes' : 'no'), __METHOD__);
+
+        } catch (\Exception $e) {
+            Yii::error('Upload error: ' . $e->getMessage(), 'upload');
+            Yii::error('Stack trace: ' . $e->getTraceAsString(), 'upload');
             
-            throw new BadRequestHttpException('Failed to save uploaded file. Check server logs for details.');
+            return [
+                'success' => false,
+                'message' => $e->getMessage(),
+                'data' => null
+            ];
         }
     }
 }

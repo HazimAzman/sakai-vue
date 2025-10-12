@@ -139,15 +139,15 @@ $config = [
                'api/institutes/<id:\d+>/update' => 'institute/update',
                'api/institutes/<id:\d+>/delete' => 'institute/delete',
 
-                // Activities API
-                'api/activities' => 'activity/index',
-                'api/activities/<id:\d+>' => 'activity/view',
-                'api/activities/create' => 'activity/create',
-                'api/activities/<id:\d+>/update' => 'activity/update',
-                'api/activities/<id:\d+>/delete' => 'activity/delete',
-                
-                // Upload API
-                'api/upload/image' => 'upload/image',
+               // Activities API
+               'api/activities' => 'activity/index',
+               'api/activities/<id:\d+>' => 'activity/view',
+               'api/activities/create' => 'activity/create',
+               'api/activities/<id:\d+>/update' => 'activity/update',
+               'api/activities/<id:\d+>/delete' => 'activity/delete',
+
+               // Upload API
+               'api/upload/image' => 'upload/image',
            ],
         ],
     ],
