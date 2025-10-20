@@ -68,6 +68,8 @@ class ServiceController extends ActiveController
             $response->data = [];
             return false;
         }
+        // Enforce auth for write methods
+        $this->enforceWriteAuth();
         return parent::beforeAction($action);
     }
 

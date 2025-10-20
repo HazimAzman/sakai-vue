@@ -200,6 +200,8 @@
               </template>
               <ActivityEditor />
             </TabPanel>
+            
+
           </TabView>
         </template>
       </Card>
@@ -217,7 +219,7 @@ import DownloadEditor from '@/views/pages/components/DownloadEditor.vue';
 import InstituteEditor from '@/views/pages/components/InstituteEditor.vue';
 import ProductEditor from '@/views/pages/components/ProductEditor.vue';
 import ServiceEditor from '@/views/pages/components/ServiceEditor.vue';
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
@@ -241,16 +243,71 @@ const handleLogout = async () => {
   }
 };
 
-onMounted(() => {
+
+
+// Token validation function
+const validateToken = async () => {
+  const token = localStorage.getItem('authToken');
+  if (!token) return false;
+
+  try {
+    const response = await fetch('https://dev.aztecsb.com/backend/web/api/auth/profile', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      // Token invalid or expired: clear auth state
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('adminLoggedIn');
+      localStorage.removeItem('adminUser');
+      localStorage.removeItem('authUser');
+      router.push('/auth/login');
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Token validation failed:', error);
+    return false;
+  }
+};
+
+onMounted(async () => {
   const isLoggedIn = localStorage.getItem('adminLoggedIn');
   const adminUser = localStorage.getItem('adminUser');
   const token = localStorage.getItem('authToken');
   const user = localStorage.getItem('authUser');
-  if (!isLoggedIn || !user) {
-      router.push('/auth/login');
-  } else {
-    username.value = adminUser;
+  
+  if (!token) {
+    router.push('/auth/login');
+    return;
   }
+
+  // Validate token with backend to ensure it's still valid
+  const isValid = await validateToken();
+  if (!isValid) {
+    return;
+  }
+
+  // Token is valid, set username
+  username.value = adminUser;
+
+  // Set up periodic token validation (every 5 minutes)
+  const tokenValidationInterval = setInterval(async () => {
+    const isValid = await validateToken();
+    if (!isValid) {
+      clearInterval(tokenValidationInterval);
+    }
+  }, 5 * 60 * 1000); // 5 minutes
+
+  // Clean up interval when component unmounts
+  onUnmounted(() => {
+    clearInterval(tokenValidationInterval);
+  });
 });
 </script>
 

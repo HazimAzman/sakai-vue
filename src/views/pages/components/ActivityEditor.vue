@@ -159,12 +159,19 @@ const editActivity = (activity) => {
 
 const uploadImage = async (file) => {
     const formData = new FormData();
-    formData.append('image', file);
+    formData.append('image', file, file.name);
     formData.append('category', 'activities');
     
     try {
-        const response = await fetch('/api/upload/image', {
+       
+        const response = await fetch('https://dev.aztecsb.com/backend/web/api/upload/image', {
             method: 'POST',
+            // Do NOT stringify or spread FormData; send it directly so the browser sets multipart/form-data with boundary
+            headers: (() => {
+                const token = localStorage.getItem('authToken');
+                return token ? { Authorization: `Bearer ${token}` } : {};
+            })(),
+         
             body: formData
         });
         

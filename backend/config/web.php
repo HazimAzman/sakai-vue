@@ -90,6 +90,8 @@ $config = [
                 'api/auth/profile' => 'auth/profile',
                 'api/auth/change-password' => 'auth/change-password',
                 
+                // Users API (Admin only)
+
                 // Products API
                 'api/products' => 'product/index',
                 'api/products/<id:\d+>' => 'product/view',

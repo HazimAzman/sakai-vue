@@ -75,27 +75,21 @@ class SecurityFilter extends ActionFilter
 
     private function getCurrentUser()
     {
-        $authHeader = Yii::$app->request->getHeaders()->get('Authorization');
+        $securityService = new SecurityService();
+        $token = $securityService->getBearerToken();
         
-        if (!$authHeader || !preg_match('/Bearer\s+(.*)$/i', $authHeader, $matches)) {
+        if (!$token) {
             throw new UnauthorizedHttpException('Authorization token required');
         }
-
-        $token = $matches[1];
-        $securityService = new SecurityService();
         
-        try {
-            $payload = $securityService->validateToken($token);
-            $user = \app\models\User::findIdentity($payload['user_id']);
-            
-            if (!$user) {
-                throw new UnauthorizedHttpException('User not found');
-            }
-            
-            return $user;
-        } catch (\Exception $e) {
+        // Use findIdentityByAccessToken which validates token against database
+        $user = \app\models\User::findIdentityByAccessToken($token);
+        
+        if (!$user) {
             throw new UnauthorizedHttpException('Invalid or expired token');
         }
+        
+        return $user;
     }
 
     private function validateInputData()

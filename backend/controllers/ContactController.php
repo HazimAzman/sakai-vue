@@ -68,6 +68,8 @@ class ContactController extends ActiveController
             $response->data = [];
             return false;
         }
+        // Enforce auth for write methods
+        $this->enforceWriteAuth();
         return parent::beforeAction($action);
     }
 
@@ -102,14 +104,14 @@ class ContactController extends ActiveController
         
         if ($data) {
             // Manually set attributes
-            if (isset($data['office_name'])) {
-                $model->office_name = $data['office_name'];
+            if (isset($data['name'])) {
+                $model->name = $data['name'];
             }
-            if (isset($data['address'])) {
-                $model->address = $data['address'];
+            if (isset($data['email'])) {
+                $model->email = $data['email'];
             }
-            if (isset($data['phone'])) {
-                $model->phone = $data['phone'];
+            if (isset($data['message'])) {
+                $model->message = $data['message'];
             }
             
             if ($model->save()) {
@@ -144,14 +146,14 @@ class ContactController extends ActiveController
         
         if ($data) {
             // Manually set attributes
-            if (isset($data['office_name'])) {
-                $model->office_name = $data['office_name'];
+            if (isset($data['name'])) {
+                $model->name = $data['name'];
             }
-            if (isset($data['address'])) {
-                $model->address = $data['address'];
+            if (isset($data['email'])) {
+                $model->email = $data['email'];
             }
-            if (isset($data['phone'])) {
-                $model->phone = $data['phone'];
+            if (isset($data['message'])) {
+                $model->message = $data['message'];
             }
             
             if ($model->save()) {

@@ -221,12 +221,13 @@ class AuthController extends Controller
 
         // Create new user
         $user = new User();
+        $user->scenario = 'create';
         $user->username = $data['username'];
         $user->email = $data['email'];
         $user->password = $data['password'];
         $user->password_repeat = $data['password_repeat'];
         $user->role = User::ROLE_USER;
-        $user->status = User::STATUS_ACTIVE;
+        $user->status = User::STATUS_INACTIVE; // Set to inactive - requires admin approval
         $user->generateAuthKey();
 
         if (!$user->save()) {
@@ -247,13 +248,14 @@ class AuthController extends Controller
 
         return [
             'success' => true,
-            'message' => 'Registration successful',
+            'message' => 'Registration successful. Your account is pending approval and will be activated by an administrator.',
             'data' => [
                 'user' => [
                     'id' => $user->id,
                     'username' => $user->username,
                     'email' => $user->email,
-                    'role' => $user->role
+                    'role' => $user->role,
+                    'status' => $user->status
                 ]
             ]
         ];
@@ -345,12 +347,8 @@ class AuthController extends Controller
     {
         $securityService = new SecurityService();
 
-        // Try to get token from Authorization header first
-        $authHeader = Yii::$app->request->getHeaders()->get('Authorization');
-        $token = null;
-        if ($authHeader && preg_match('/Bearer\s+(.*)$/i', $authHeader, $matches)) {
-            $token = $matches[1];
-        }
+        // Try to get token from Authorization header first (robust across servers)
+        $token = (new SecurityService())->getBearerToken();
 
         // Fallback: allow token in JSON body (useful if client can’t set headers)
         if (!$token) {
@@ -422,26 +420,19 @@ class AuthController extends Controller
      */
     private function getCurrentUser()
     {
-        $authHeader = Yii::$app->request->getHeaders()->get('Authorization');
+        $token = (new SecurityService())->getBearerToken();
         
-        if (!$authHeader || !preg_match('/Bearer\s+(.*)$/i', $authHeader, $matches)) {
+        if (!$token) {
             throw new UnauthorizedHttpException('Authorization token required');
         }
-
-        $token = $matches[1];
-        $securityService = new SecurityService();
         
-        try {
-            $payload = $securityService->validateToken($token);
-            $user = User::findIdentity($payload['user_id']);
-            
-            if (!$user) {
-                throw new UnauthorizedHttpException('User not found');
-            }
-            
-            return $user;
-        } catch (\Exception $e) {
+        // Use findIdentityByAccessToken which validates token against database
+        $user = User::findIdentityByAccessToken($token);
+        
+        if (!$user) {
             throw new UnauthorizedHttpException('Invalid or expired token');
         }
+        
+        return $user;
     }
 }

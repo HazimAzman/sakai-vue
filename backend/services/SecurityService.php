@@ -31,6 +31,58 @@ class SecurityService extends Component
         $this->rateWindow = \EnvConfig::getInt('API_RATE_WINDOW', 3600);
     }
 
+    /**
+     * Retrieve the raw Authorization header in a robust way across servers.
+     */
+    public function getAuthorizationHeader()
+    {
+        // Prefer Yii's header bag
+        $header = Yii::$app->request->getHeaders()->get('Authorization');
+        if (!empty($header)) {
+            return $header;
+        }
+
+        // Common server vars when Authorization is not forwarded to PHP header bag
+        if (!empty($_SERVER['HTTP_AUTHORIZATION'])) {
+            return $_SERVER['HTTP_AUTHORIZATION'];
+        }
+        if (!empty($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
+            return $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
+        }
+
+        // Fallback for Apache/FastCGI environments
+        if (function_exists('apache_request_headers')) {
+            $requestHeaders = apache_request_headers();
+            if (is_array($requestHeaders)) {
+                // Normalize header keys to be case-insensitive
+                $normalized = [];
+                foreach ($requestHeaders as $key => $value) {
+                    $normalized[strtolower($key)] = $value;
+                }
+                if (!empty($normalized['authorization'])) {
+                    return $normalized['authorization'];
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Extract Bearer token from Authorization header.
+     */
+    public function getBearerToken()
+    {
+        $authHeader = $this->getAuthorizationHeader();
+        if (!$authHeader) {
+            return null;
+        }
+        if (preg_match('/Bearer\s+(.*)$/i', $authHeader, $matches)) {
+            return trim($matches[1]);
+        }
+        return null;
+    }
+
     private function requireDbTokens(): bool
     {
         return (bool) \EnvConfig::getInt('REQUIRE_DB_TOKENS', 0);
@@ -282,10 +334,32 @@ class SecurityService extends Component
      */
     public function hashPassword($password)
     {
-        return password_hash($password, PASSWORD_ARGON2ID, [
-            'memory_cost' => 65536, // 64 MB
-            'time_cost' => 4,       // 4 iterations
-            'threads' => 3,         // 3 threads
+        // Check if ARGON2ID is supported
+        if (defined('PASSWORD_ARGON2ID')) {
+            $options = [
+                'memory_cost' => 65536, // 64 MB
+                'time_cost' => 4,       // 4 iterations
+            ];
+            
+            // Only add threads parameter if supported (PHP 7.4+)
+            if (PHP_VERSION_ID >= 70400) {
+                $options['threads'] = 1; // Use 1 thread for compatibility
+            }
+            
+            return password_hash($password, PASSWORD_ARGON2ID, $options);
+        }
+        
+        // Fallback to ARGON2I if ARGON2ID is not available
+        if (defined('PASSWORD_ARGON2I')) {
+            return password_hash($password, PASSWORD_ARGON2I, [
+                'memory_cost' => 65536,
+                'time_cost' => 4,
+            ]);
+        }
+        
+        // Final fallback to BCRYPT
+        return password_hash($password, PASSWORD_BCRYPT, [
+            'cost' => 12
         ]);
     }
     

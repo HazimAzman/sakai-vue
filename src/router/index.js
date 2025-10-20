@@ -19,6 +19,7 @@ const router = createRouter({
             component: () => import('@/views/pages/Admin.vue'),
             meta: { requiresAuth: true }
         },
+  
         {
             path: '/privacy-policy',
             name: 'privacy-policy',
@@ -43,38 +44,84 @@ const router = createRouter({
 });
 
 // Authentication guard with token validation/expiry check
-router.beforeEach((to, _from, next) => {
-    const isLoggedIn = localStorage.getItem('adminLoggedIn');
+router.beforeEach(async (to, _from, next) => {
     const token = localStorage.getItem('authToken');
-
-    // If a token exists, check expiry (JWT exp claim) on navigation
-    if (token) {
-        const parts = token.split('.');
-        if (parts.length === 3) {
-            try {
-                const payloadJson = atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'));
-                const payload = JSON.parse(decodeURIComponent(escape(payloadJson)));
-                const now = Math.floor(Date.now() / 1000);
-                if (typeof payload.exp === 'number' && payload.exp <= now) {
-                    // Token expired: clear auth state
-                    localStorage.removeItem('authToken');
-                    localStorage.removeItem('adminLoggedIn');
-                }
-            } catch (_) {
-                // On parse error, treat as invalid token
-                localStorage.removeItem('authToken');
-                localStorage.removeItem('adminLoggedIn');
-            }
-        }
-    }
-
     const stillLoggedIn = !!localStorage.getItem('adminLoggedIn');
 
-    if (to.meta.requiresAuth && !stillLoggedIn) {
+    // If no token, redirect to login for protected routes
+    if (to.meta.requiresAuth && !token) {
         next('/auth/login');
-    } else if (to.path === '/auth/login' && stillLoggedIn) {
+        return;
+    }
+
+    // If on login page and already logged in with valid token, redirect to admin
+    if (to.path === '/auth/login' && stillLoggedIn && token) {
         next('/admin');
+        return;
+    }
+
+    // If token exists, validate it with the backend
+    if (token && to.meta.requiresAuth) {
+        try {
+            // Check local JWT expiry first (fast check)
+            const parts = token.split('.');
+            if (parts.length === 3) {
+                try {
+                    const payloadJson = atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'));
+                    const payload = JSON.parse(decodeURIComponent(escape(payloadJson)));
+                    const now = Math.floor(Date.now() / 1000);
+                    if (typeof payload.exp === 'number' && payload.exp <= now) {
+                        // Token expired locally: clear auth state
+                        localStorage.removeItem('authToken');
+                        localStorage.removeItem('adminLoggedIn');
+                        localStorage.removeItem('adminUser');
+                        localStorage.removeItem('authUser');
+                        next('/auth/login');
+                        return;
+                    }
+                } catch (_) {
+                    // On parse error, treat as invalid token
+                    localStorage.removeItem('authToken');
+                    localStorage.removeItem('adminLoggedIn');
+                    localStorage.removeItem('adminUser');
+                    localStorage.removeItem('authUser');
+                    next('/auth/login');
+                    return;
+                }
+            }
+
+            // Validate token with backend (check if still exists in database)
+            const response = await fetch('https://dev.aztecsb.com/backend/web/api/auth/profile', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                // Token invalid or expired on server: clear auth state
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('adminLoggedIn');
+                localStorage.removeItem('adminUser');
+                localStorage.removeItem('authUser');
+                next('/auth/login');
+                return;
+            }
+
+            // Token is valid, allow navigation
+            next();
+        } catch (error) {
+            // Network error or other issue: clear auth state for safety
+            console.error('Token validation failed:', error);
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('adminLoggedIn');
+            localStorage.removeItem('adminUser');
+            localStorage.removeItem('authUser');
+            next('/auth/login');
+        }
     } else {
+        // No token required for this route
         next();
     }
 });
