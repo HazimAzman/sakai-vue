@@ -85,11 +85,15 @@ const resetForm = () => {
     form.phone = '';
 };
 
+
 const loadContacts = async () => {
     loading.value = true;
     try {
-        const response = await ApiService.getContacts();
-        contacts.value = response.data || response;
+        const response = await ApiService.getAdminContacts();
+        const data = response.data || response;
+        
+        // Use raw data directly without sanitization
+        contacts.value = data;
     } catch (e) {
         contacts.value = [];
         console.error('Failed to load contacts:', e);

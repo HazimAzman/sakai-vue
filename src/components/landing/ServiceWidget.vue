@@ -20,12 +20,12 @@
             <!-- Service Cards Grid -->
             <div v-else class="col-span-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div 
-                    v-for="service in services" 
-                    :key="service.id"
+                    v-for="(service, index) in services" 
+                    :key="`service-${index}`"
                     class="bg-white dark:bg-surface-800 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300"
                 >
                     <img 
-                        :src="service.image_path" 
+                        :src="service.image_url" 
                         :alt="service.name" 
                         class="w-full h-48 object-cover"
                         @error="handleImageError"

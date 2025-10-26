@@ -19,18 +19,18 @@
         <!-- Activities Cards with Flip Effect -->
         <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <div
-                v-for="activity in activities"
-                :key="activity.id"
+                v-for="(activity, index) in activities"
+                :key="`activity-${index}`"
                 class="activity-card"
-                @mouseenter="hoveredCard = activity.id"
+                @mouseenter="hoveredCard = index"
                 @mouseleave="hoveredCard = null"
             >
-                <div class="card-inner" :class="{ 'flipped': hoveredCard === activity.id }">
+                <div class="card-inner" :class="{ 'flipped': hoveredCard === index }">
                     <!-- Front of Card -->
                     <div class="card-front">
                         <div class="card-image">
                             <img
-                                :src="activity.image_path"
+                                :src="activity.image_url"
                                 :alt="activity.title"
                                 class="w-full h-64 object-cover"
                                 @error="handleImageError"

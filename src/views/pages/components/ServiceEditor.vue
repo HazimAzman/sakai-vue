@@ -13,8 +13,11 @@
             <Column field="description" header="Description" />
             <Column header="Image" style="width: 100px">
                 <template #body="{ data }">
-                    <img v-if="data.image_path" :src="data.image_path" :alt="data.title" 
-                         class="w-4rem h-4rem object-cover border-round" />
+                    <img v-if="data.image_url || data.image_path" 
+                         :src="data.image_url || data.image_path" 
+                         :alt="data.title" 
+                         class="w-4rem h-4rem object-cover border-round"
+                         @error="handleImageError" />
                     <span v-else class="text-500">No image</span>
                 </template>
             </Column>
@@ -62,7 +65,8 @@
                 <!-- Preview uploaded image -->
                 <div v-if="form.image_path" class="mt-3">
                     <img :src="form.image_path" :alt="form.title" 
-                         class="w-8rem h-8rem object-cover border-round border-1 border-300" />
+                         class="w-8rem h-8rem object-cover border-round border-1 border-300"
+                         @error="handleImageError" />
                 </div>
             </div>
 
@@ -138,7 +142,7 @@ const uploadImage = async (file) => {
     
     try {
        
-        const response = await fetch('https://dev.aztecsb.com/backend/web/api/upload/image', {
+        const response = await fetch('https://aztecsb.com/backend/web/api/upload/image', {
             method: 'POST',
             // Do NOT stringify or spread FormData; send it directly so the browser sets multipart/form-data with boundary
             headers: (() => {
@@ -161,17 +165,28 @@ const uploadImage = async (file) => {
     }
 };
 
+
 const loadServices = async () => {
     loading.value = true;
     try {
-        const response = await ApiService.getServices();
-        services.value = response.data || response;
+        const response = await ApiService.getAdminServices();
+        const data = response.data || response;
+        
+        // Use raw data directly without sanitization
+        services.value = data;
     } catch (e) {
         services.value = [];
         console.error('Failed to load services:', e);
     } finally {
         loading.value = false;
     }
+};
+
+const handleImageError = (event) => {
+    const img = event.target;
+    if (img.__fallbackApplied) return; // prevent infinite loop
+    img.__fallbackApplied = true;
+    img.src = '/images/placeholder-service.png';
 };
 
 const openNew = () => {
@@ -186,7 +201,7 @@ const editService = (service) => {
     selectedFile.value = null;
     form.title = service.title || '';
     form.description = service.description || '';
-    form.image_path = service.image_path || '';
+    form.image_path = service.image_url || service.image_path || '';
     dialogVisible.value = true;
 };
 

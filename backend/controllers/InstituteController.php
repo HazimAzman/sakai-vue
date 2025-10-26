@@ -9,6 +9,7 @@ use yii\filters\Cors;
 use yii\filters\ContentNegotiator;
 use app\models\Institute;
 use app\filters\SecurityFilter;
+use app\services\DataSanitizer;
 
 class InstituteController extends ActiveController
 {
@@ -86,9 +87,17 @@ class InstituteController extends ActiveController
 
     public function prepareDataProvider()
     {
-        return new \yii\data\ActiveDataProvider([
-            'query' => Institute::find(),
-            'pagination' => false, // Disable pagination to return all institutes
+        // Get the raw data first
+        $query = Institute::find();
+        $models = $query->all();
+        
+        // Sanitize the data
+        $sanitizedModels = DataSanitizer::sanitizeArray($models, 'sanitizeInstitute');
+        
+        // Create a custom data provider with sanitized data
+        return new \yii\data\ArrayDataProvider([
+            'allModels' => $sanitizedModels,
+            'pagination' => false,
         ]);
     }
 

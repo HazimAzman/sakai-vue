@@ -75,10 +75,10 @@ onMounted(() => {
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="(download, index) in downloads" :key="download.id" :class="index % 2 === 0 ? 'bg-white dark:bg-surface-800' : 'bg-surface-50 dark:bg-surface-900'">
-                        <td class="px-4 py-3 text-surface-900 dark:text-surface-0">{{ download.brand_name }}</td>
+                    <tr v-for="(download, index) in downloads" :key="`download-${index}`" :class="index % 2 === 0 ? 'bg-white dark:bg-surface-800' : 'bg-surface-50 dark:bg-surface-900'">
+                        <td class="px-4 py-3 text-surface-900 dark:text-surface-0">{{ download.name }}</td>
                         <td class="px-4 py-3">
-                            <a :href="getCleanUrl(download.download_url)" target="_blank" rel="noopener" class="inline-flex items-center text-red-600 hover:text-red-700">
+                            <a :href="getCleanUrl(download.file_url)" target="_blank" rel="noopener" class="inline-flex items-center text-red-600 hover:text-red-700">
                                 <!-- Download icon (inline SVG) -->
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
                                     <path d="M12 3a1 1 0 011 1v8.586l2.293-2.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L11 12.586V4a1 1 0 011-1z"/>

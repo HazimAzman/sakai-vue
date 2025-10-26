@@ -19,12 +19,12 @@
         <!-- Product Brand Logos Grid -->
         <div v-else class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4">
             <div 
-                v-for="product in products" 
-                :key="product.id"
+                v-for="(product, index) in products" 
+                :key="`product-${index}`"
                 class="bg-white dark:bg-surface-800 rounded-lg shadow-md p-4 text-center hover:shadow-lg transition-shadow duration-300"
             >
                 <img 
-                    :src="product.image_path" 
+                    :src="product.image_url" 
                     :alt="product.name" 
                     class="h-16 mx-auto mb-4 object-contain"
                     @error="handleImageError"

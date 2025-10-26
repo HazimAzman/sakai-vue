@@ -9,6 +9,7 @@ use yii\filters\Cors;
 use yii\filters\ContentNegotiator;
 use app\models\About;
 use app\filters\SecurityFilter;
+use app\services\DataSanitizer;
 
 class AboutController extends ActiveController
 {
@@ -88,9 +89,17 @@ class AboutController extends ActiveController
 
     public function prepareDataProvider()
     {
-        return new \yii\data\ActiveDataProvider([
-            'query' => About::find(),
-            'pagination' => false, // Disable pagination to return all items
+        // Get the raw data first
+        $query = About::find();
+        $models = $query->all();
+        
+        // Sanitize the data
+        $sanitizedModels = DataSanitizer::sanitizeArray($models, 'sanitizeAbout');
+        
+        // Create a custom data provider with sanitized data
+        return new \yii\data\ArrayDataProvider([
+            'allModels' => $sanitizedModels,
+            'pagination' => false,
         ]);
     }
 

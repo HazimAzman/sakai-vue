@@ -37,7 +37,7 @@
                     </div>
 
                     <div class="space-y-6 text-surface-700 dark:text-surface-300 leading-relaxed">
-                        <div v-html="aboutContent.description || defaultDescription"></div>
+                        <div v-html="aboutContent.content"></div>
                     </div>
                 </div>
 
@@ -45,7 +45,7 @@
                 <div class="col-span-12 lg:col-span-4 flex justify-center lg:justify-end">
                     <div class="text-center">
                         <img 
-                            :src="aboutContent.image_path || '/images/about/azman-yunus.png'" 
+                            :src="aboutContent.image_url || '/images/about/azman-yunus.png'" 
                             :alt="aboutContent.name || 'Azman Yunus'" 
                             class="w-80 h-100 object-cover rounded-lg shadow-lg mb-4"
                             @error="handleImageError"

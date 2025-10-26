@@ -14,8 +14,11 @@
             <Column field="ceo_title" header="CEO Title" />
             <Column header="CEO Image" style="width: 100px">
                 <template #body="{ data }">
-                    <img v-if="data.ceo_image" :src="data.ceo_image" :alt="data.ceo_name" 
-                         class="w-4rem h-4rem object-cover border-round" />
+                    <img v-if="data.image_url || data.ceo_image" 
+                         :src="data.image_url || data.ceo_image" 
+                         :alt="data.ceo_name || data.name" 
+                         class="w-4rem h-4rem object-cover border-round"
+                         @error="handleImageError" />
                     <span v-else class="text-500">No image</span>
                 </template>
             </Column>
@@ -75,7 +78,8 @@
                 <!-- Preview uploaded image -->
                 <div v-if="form.ceo_image" class="mt-3">
                     <img :src="form.ceo_image" :alt="form.ceo_name" 
-                         class="w-8rem h-8rem object-cover border-round border-1 border-300" />
+                         class="w-8rem h-8rem object-cover border-round border-1 border-300"
+                         @error="handleImageError" />
                 </div>
             </div>
 
@@ -155,7 +159,7 @@ const uploadImage = async (file) => {
     
     try {
        
-        const response = await fetch('https://dev.aztecsb.com/backend/web/api/upload/image', {
+        const response = await fetch('https://aztecsb.com/backend/web/api/upload/image', {
             method: 'POST',
             // Do NOT stringify or spread FormData; send it directly so the browser sets multipart/form-data with boundary
             headers: (() => {
@@ -179,17 +183,28 @@ const uploadImage = async (file) => {
 };
 
 
+
 const loadAbout = async () => {
     loading.value = true;
     try {
-        const response = await ApiService.getAbout();
-        aboutEntries.value = response.data || response;
+        const response = await ApiService.getAdminAbout();
+        const data = response.data || response;
+        
+        // Use raw data directly without sanitization
+        aboutEntries.value = data;
     } catch (e) {
         aboutEntries.value = [];
         console.error('Failed to load about entries:', e);
     } finally {
         loading.value = false;
     }
+};
+
+const handleImageError = (event) => {
+    const img = event.target;
+    if (img.__fallbackApplied) return; // prevent infinite loop
+    img.__fallbackApplied = true;
+    img.src = '/images/about/azman-yunus.png';
 };
 
 const openNew = () => {
@@ -204,9 +219,9 @@ const editAbout = (about) => {
     selectedFile.value = null;
     form.title = about.title || '';
     form.content = about.content || '';
-    form.ceo_name = about.ceo_name || '';
-    form.ceo_title = about.ceo_title || '';
-    form.ceo_image = about.ceo_image || '';
+    form.ceo_name = about.ceo_name || about.name || '';
+    form.ceo_title = about.ceo_title || about.position || '';
+    form.ceo_image = about.image_url || about.ceo_image || '';
     dialogVisible.value = true;
 };
 

@@ -33,8 +33,8 @@
             <!-- Office Contact Cards -->
             <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
                 <div 
-                    v-for="contact in contacts" 
-                    :key="contact.id"
+                    v-for="(contact, index) in contacts" 
+                    :key="`contact-${index}`"
                     class="bg-white rounded-lg shadow-lg p-6 border border-gray-100"
                 >
                     <h3 class="text-surface-900 dark:text-surface-0 font-bold text-xl mb-4">{{ contact.name }}</h3>

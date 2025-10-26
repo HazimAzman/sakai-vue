@@ -37,7 +37,7 @@
                           placeholder="https://example.com/download"
                           :class="{ 'p-invalid': !form.download_url }" />
                 <small v-if="!form.download_url" class="ml-3 p-error">Download URL is required.</small>
-                <small class="ml-3 text-500">Enter the full URL for the download link</small>
+                <small class="ml-3 text-500">Enter the full URL for the download</small>
             </div>
 
             <template #footer>
@@ -92,11 +92,15 @@ const resetForm = () => {
     form.download_url = '';
 };
 
+
 const loadDownloads = async () => {
     loading.value = true;
     try {
-        const response = await ApiService.getDownloads();
-        downloads.value = response.data || response;
+        const response = await ApiService.getAdminDownloads();
+        const data = response.data || response;
+        
+        // Use raw data directly without sanitization
+        downloads.value = data;
     } catch (e) {
         downloads.value = [];
         console.error('Failed to load downloads:', e);

@@ -11,7 +11,16 @@
             <Column field="id" header="ID" style="width: 80px" />
             <Column field="name" header="Institute Name" />
             <Column field="abbreviation" header="Abbreviation" />
-            <Column field="image_path" header="Image Path" />
+            <Column header="Logo" style="width: 100px">
+                <template #body="{ data }">
+                    <img v-if="data.image_path" 
+                         :src="data.image_path" 
+                         :alt="data.name" 
+                         class="w-4rem h-4rem object-cover border-round"
+                         @error="handleImageError" />
+                    <span v-else class="text-500">No logo</span>
+                </template>
+            </Column>
             <Column header="Actions" style="width: 160px">
                 <template #body="{ data }">
                     <div class="flex gap-2">
@@ -53,7 +62,8 @@
                 <!-- Preview uploaded image -->
                 <div v-if="form.image_path" class="mt-3">
                     <img :src="form.image_path" :alt="form.name" 
-                         class="w-8rem h-8rem object-cover border-round border-1 border-300" />
+                         class="w-8rem h-8rem object-cover border-round border-1 border-300"
+                         @error="handleImageError" />
                 </div>
             </div>
 
@@ -114,7 +124,7 @@ const uploadImage = async (file) => {
     
     try {
        
-        const response = await fetch('https://dev.aztecsb.com/backend/web/api/upload/image', {
+        const response = await fetch('https://aztecsb.com/backend/web/api/upload/image', {
             method: 'POST',
             // Do NOT stringify or spread FormData; send it directly so the browser sets multipart/form-data with boundary
             headers: (() => {
@@ -137,17 +147,28 @@ const uploadImage = async (file) => {
     }
 };
 
+
 const loadInstitutes = async () => {
     try {
         loading.value = true;
-        const response = await ApiService.getInstitutes();
-        institutes.value = response.value || response.data || response;
+        const response = await ApiService.getAdminInstitutes();
+        const data = response.value || response.data || response;
+        
+        // Use raw data directly without sanitization
+        institutes.value = data;
     } catch (error) {
         console.error('Failed to load institutes:', error);
         showError('Error', 'Failed to load institutes');
     } finally {
         loading.value = false;
     }
+};
+
+const handleImageError = (event) => {
+    const img = event.target;
+    if (img.__fallbackApplied) return; // prevent infinite loop
+    img.__fallbackApplied = true;
+    img.src = '/images/placeholder-institute.png';
 };
 
 const openNew = () => {

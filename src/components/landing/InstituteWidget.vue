@@ -19,18 +19,17 @@
         <!-- Institute Logos Grid -->
         <div v-else class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-6">
             <div 
-                v-for="institute in institutes" 
-                :key="institute.id"
+                v-for="(institute, index) in institutes" 
+                :key="`institute-${index}`"
                 class="bg-white dark:bg-surface-800 rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow duration-300"
             >
                 <img 
-                    :src="institute.image_path" 
+                    :src="institute.logo_url" 
                     :alt="institute.name" 
                     class="h-16 mx-auto mb-4 object-contain"
                     @error="handleImageError"
                 />
                 <div class="text-sm font-semibold text-surface-900 dark:text-surface-0">{{ institute.name }}</div>
-                <div class="text-xs text-surface-600 dark:text-surface-300">({{ institute.abbreviation }})</div>
             </div>
         </div>
     </div>

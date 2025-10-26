@@ -7,87 +7,12 @@
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>Aztec Sinar</title>
       <link href="https://fonts.cdnfonts.com/css/lato" rel="stylesheet">
-      <style>
-        /* Hide Tawk.to widget on admin pages */
-        body.admin-page #tawk-widget {
-          display: none !important;
-        }
-        body.admin-page .tawk-widget {
-          display: none !important;
-        }
-        body.admin-page [id*="tawk"] {
-          display: none !important;
-        }
-        body.admin-page iframe[src*="tawk"] {
-          display: none !important;
-        }
-        body.admin-page div[class*="tawk"] {
-          display: none !important;
-        }
-        /* Additional aggressive hiding for admin pages */
-        body.admin-page *[style*="position: fixed"][style*="bottom"] {
-          display: none !important;
-        }
-      </style>
 </head>
 
 <body>
       <div id="app"></div>
       <script type="module" src="/src/main.js"></script>
       
-      <!--Start of Tawk.to Script-->
-<script type="text/javascript">
-      var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-      
-      // Configure Tawk.to to be manageable
-      Tawk_API.customStyle = {
-          visibility: {
-              desktop: {
-                  position: 'br',
-                  xOffset: 20,
-                  yOffset: 20
-              },
-              mobile: {
-                  position: 'br',
-                  xOffset: 10,
-                  yOffset: 10
-              }
-          }
-      };
-      
-      // Add custom functions for better control
-      Tawk_API.hideWidget = function() {
-          if (window.Tawk_API && window.Tawk_API.hideWidget) {
-              window.Tawk_API.hideWidget();
-          }
-          // Also hide via CSS
-          const tawkElements = document.querySelectorAll('[id*="tawk"], [class*="tawk"], iframe[src*="tawk"]');
-          tawkElements.forEach(el => {
-              el.style.display = 'none !important';
-          });
-      };
-      
-      Tawk_API.showWidget = function() {
-          if (window.Tawk_API && window.Tawk_API.showWidget) {
-              window.Tawk_API.showWidget();
-          }
-          // Also show via CSS
-          const tawkElements = document.querySelectorAll('[id*="tawk"], [class*="tawk"], iframe[src*="tawk"]');
-          tawkElements.forEach(el => {
-              el.style.display = '';
-          });
-      };
-      
-      (function(){
-      var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-      s1.async=true;
-      s1.src='https://embed.tawk.to/68da3c354ea4fa194c12fa6f/1j6a7md4i';
-      s1.charset='UTF-8';
-      s1.setAttribute('crossorigin','*');
-      s0.parentNode.insertBefore(s1,s0);
-      })();
-      </script>
-      <!--End of Tawk.to Script-->
 </body>
 
 </html>

@@ -251,7 +251,7 @@ const validateToken = async () => {
   if (!token) return false;
 
   try {
-    const response = await fetch('https://dev.aztecsb.com/backend/web/api/auth/profile', {
+    const response = await fetch('https://aztecsb.com/backend/web/api/auth/profile', {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,

@@ -19,18 +19,17 @@
         <!-- University Logos Grid -->
         <div v-else class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-6">
             <div 
-                v-for="client in clients" 
-                :key="client.id"
+                v-for="(client, index) in clients" 
+                :key="`client-${index}`"
                 class="bg-white dark:bg-surface-800 rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow duration-300"
             >
                 <img 
-                    :src="client.logo_path" 
+                    :src="client.logo_url" 
                     :alt="client.name" 
                     class="h-12 mx-auto mb-3 object-contain"
                     @error="handleImageError"
                 />
                 <div class="text-sm font-semibold text-surface-900 dark:text-surface-0">{{ client.name }}</div>
-                <div class="text-xs text-surface-600 dark:text-surface-300">({{ client.short_name }})</div>
             </div>
         </div>
     </div>

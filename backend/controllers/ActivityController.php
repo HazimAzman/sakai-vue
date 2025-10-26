@@ -9,6 +9,7 @@ use yii\filters\Cors;
 use yii\filters\ContentNegotiator;
 use app\models\Activity;
 use app\filters\SecurityFilter;
+use app\services\DataSanitizer;
 
 class ActivityController extends ActiveController
 {
@@ -56,7 +57,7 @@ class ActivityController extends ActiveController
     {
         // Set CORS headers for all requests
         $response = Yii::$app->response;
-        $response->headers->set('Access-Control-Allow-Origin', 'http://localhost:5173');
+        $response->headers->set('Access-Control-Allow-Origin', '');
         $response->headers->set('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS');
         $response->headers->set('Access-Control-Allow-Headers', '*');
         $response->headers->set('Access-Control-Allow-Credentials', 'true');
@@ -86,9 +87,17 @@ class ActivityController extends ActiveController
 
     public function prepareDataProvider()
     {
-        return new \yii\data\ActiveDataProvider([
-            'query' => Activity::find(),
-            'pagination' => false, // Disable pagination to return all activities
+        // Get the raw data first
+        $query = Activity::find();
+        $models = $query->all();
+        
+        // Sanitize the data
+        $sanitizedModels = DataSanitizer::sanitizeArray($models, 'sanitizeActivity');
+        
+        // Create a custom data provider with sanitized data
+        return new \yii\data\ArrayDataProvider([
+            'allModels' => $sanitizedModels,
+            'pagination' => false,
         ]);
     }
 

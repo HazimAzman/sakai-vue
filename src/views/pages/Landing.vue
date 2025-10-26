@@ -11,6 +11,7 @@ import ProductWidget from '@/components/landing/ProductWidget.vue';
 import ServiceWidget from '@/components/landing/ServiceWidget.vue';
 import TopbarWidget from '@/components/landing/TopbarWidget.vue';
 import VisionCarousel from '@/components/landing/VisionCarousel.vue';
+import WhatsAppWidget from '@/components/landing/WhatsAppWidget.vue';
 </script>
 
 <template>
@@ -39,6 +40,9 @@ import VisionCarousel from '@/components/landing/VisionCarousel.vue';
             <ContactWidget />
             <DownloadWidget />
             <FooterWidget />
+            
+            <!-- WhatsApp Widget -->
+            <WhatsAppWidget />
         </div>
     </div>
 </template>

@@ -12,8 +12,11 @@
             <Column field="title" header="Title" />
             <Column header="Image" style="width: 100px">
                 <template #body="{ data }">
-                    <img v-if="data.image_path" :src="data.image_path" :alt="data.title" 
-                         class="w-4rem h-4rem object-cover border-round" />
+                    <img v-if="data.image_url || data.image_path" 
+                         :src="data.image_url || data.image_path" 
+                         :alt="data.title" 
+                         class="w-4rem h-4rem object-cover border-round"
+                         @error="handleImageError" />
                     <span v-else class="text-500">No image</span>
                 </template>
             </Column>
@@ -66,7 +69,8 @@
                 <!-- Preview uploaded image -->
                 <div v-if="form.image_path" class="mt-3">
                     <img :src="form.image_path" :alt="form.title" 
-                         class="w-8rem h-8rem object-cover border-round border-1 border-300" />
+                         class="w-8rem h-8rem object-cover border-round border-1 border-300"
+                         @error="handleImageError" />
                 </div>
             </div>
 
@@ -122,17 +126,31 @@ const onImageSelect = (event) => {
     }
 };
 
+
 const loadActivities = async () => {
     try {
         loading.value = true;
-        const response = await ApiService.getActivities();
-        activities.value = response.value || response.data || response;
+        const response = await ApiService.getAdminActivities();
+        const data = response.value || response.data || response;
+        
+        // Use raw data directly without sanitization
+        activities.value = data;
+        
+        console.log('Processed activities data:', activities.value);
+        console.log('First activity ID:', activities.value[0]?.id);
     } catch (error) {
         console.error('Failed to load activities:', error);
         showError('Error', 'Failed to load activities');
     } finally {
         loading.value = false;
     }
+};
+
+const handleImageError = (event) => {
+    const img = event.target;
+    if (img.__fallbackApplied) return; // prevent infinite loop
+    img.__fallbackApplied = true;
+    img.src = '/images/placeholder-activity.png';
 };
 
 const openNew = () => {
@@ -152,7 +170,7 @@ const editActivity = (activity) => {
     form.value = {
         title: activity.title,
         description: activity.description,
-        image_path: activity.image_path
+        image_path: activity.image_url || activity.image_path
     };
     dialogVisible.value = true;
 };
@@ -164,7 +182,7 @@ const uploadImage = async (file) => {
     
     try {
        
-        const response = await fetch('https://dev.aztecsb.com/backend/web/api/upload/image', {
+        const response = await fetch('https://aztecsb.com/backend/web/api/upload/image', {
             method: 'POST',
             // Do NOT stringify or spread FormData; send it directly so the browser sets multipart/form-data with boundary
             headers: (() => {
@@ -237,6 +255,16 @@ const confirmDelete = (activity) => {
 const deleteActivity = async () => {
     try {
         deleting.value = true;
+        console.log('Deleting activity with ID:', currentActivity.value?.id);
+        console.log('Current activity object:', currentActivity.value);
+        
+        if (!currentActivity.value?.id) {
+            showError('Error', 'Cannot delete: No valid ID found');
+            deleting.value = false;
+            return;
+        }
+        
+        
         await ApiService.deleteActivity(currentActivity.value.id);
         showSuccess('Success', 'Activity deleted successfully');
         deleteDialogVisible.value = false;

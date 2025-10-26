@@ -9,6 +9,7 @@ use yii\filters\Cors;
 use yii\filters\ContentNegotiator;
 use app\models\Download;
 use app\filters\SecurityFilter;
+use app\services\DataSanitizer;
 
 class DownloadController extends ActiveController
 {
@@ -86,9 +87,17 @@ class DownloadController extends ActiveController
 
     public function prepareDataProvider()
     {
-        return new \yii\data\ActiveDataProvider([
-            'query' => Download::find(),
-            'pagination' => false, // Disable pagination to return all items
+        // Get the raw data first
+        $query = Download::find();
+        $models = $query->all();
+        
+        // Sanitize the data
+        $sanitizedModels = DataSanitizer::sanitizeArray($models, 'sanitizeDownload');
+        
+        // Create a custom data provider with sanitized data
+        return new \yii\data\ArrayDataProvider([
+            'allModels' => $sanitizedModels,
+            'pagination' => false,
         ]);
     }
 

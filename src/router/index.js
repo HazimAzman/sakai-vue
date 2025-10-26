@@ -91,7 +91,7 @@ router.beforeEach(async (to, _from, next) => {
             }
 
             // Validate token with backend (check if still exists in database)
-            const response = await fetch('https://dev.aztecsb.com/backend/web/api/auth/profile', {
+            const response = await fetch('https://aztecsb.com/backend/web/api/auth/profile', {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`,

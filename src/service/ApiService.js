@@ -1,7 +1,7 @@
 // API Service for communicating with Yii2 backend
 // Prefer Vite env base URL when available; default to relative '/api' via dev proxy
 const ENV_BASE = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE_URL) ? String(import.meta.env.VITE_API_BASE_URL).replace(/\/$/, '') : '';
-const API_BASE_URL = 'https://dev.aztecsb.com/backend/web' || '';
+const API_BASE_URL = 'https://aztecsb.com/backend/web' || '';
 
 
 
@@ -116,6 +116,16 @@ export const ApiService = {
         return this.apiCall('/api/products');
     },
 
+    // Admin Products API (with ID field)
+    async getAdminProducts() {
+        const token = localStorage.getItem('authToken');
+        return this.apiCall('/api/admin/products', {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            }
+        });
+    },
+
     async getProduct(id) {
         return this.apiCall(`/api/products/${id}`);
     },
@@ -155,6 +165,16 @@ export const ApiService = {
     // Services API
     async getServices() {
         return this.apiCall('/api/services');
+    },
+
+    // Admin Services API (with ID field)
+    async getAdminServices() {
+        const token = localStorage.getItem('authToken');
+        return this.apiCall('/api/admin/services', {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            }
+        });
     },
 
     async getService(id) {
@@ -198,6 +218,16 @@ export const ApiService = {
         return this.apiCall('/api/about');
     },
 
+    // Admin About API (with ID field)
+    async getAdminAbout() {
+        const token = localStorage.getItem('authToken');
+        return this.apiCall('/api/admin/about', {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            }
+        });
+    },
+
     async getAboutEntry(id) {
         return this.apiCall(`/api/about/${id}`);
     },
@@ -237,6 +267,16 @@ export const ApiService = {
     // Downloads API
     async getDownloads() {
         return this.apiCall('/api/downloads');
+    },
+
+    // Admin Downloads API (with ID field)
+    async getAdminDownloads() {
+        const token = localStorage.getItem('authToken');
+        return this.apiCall('/api/admin/downloads', {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            }
+        });
     },
 
     async getDownload(id) {
@@ -280,6 +320,16 @@ export const ApiService = {
         return this.apiCall('/api/clients');
     },
 
+    // Admin Clients API (with ID field)
+    async getAdminClients() {
+        const token = localStorage.getItem('authToken');
+        return this.apiCall('/api/admin/clients', {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            }
+        });
+    },
+
     async getClient(id) {
         return this.apiCall(`/api/clients/${id}`);
     },
@@ -319,6 +369,11 @@ export const ApiService = {
     // Contacts API
     async getContacts() {
         return this.apiCall('/api/contacts');
+    },
+
+    // Admin Contacts API (with ID field)
+    async getAdminContacts() {
+        return this.apiCall('/api/admin/contacts');
     },
 
     async getContact(id) {
@@ -362,6 +417,11 @@ export const ApiService = {
         return this.apiCall('/api/institutes');
     },
 
+    // Admin Institutes API (with ID field)
+    async getAdminInstitutes() {
+        return this.apiCall('/api/admin/institutes');
+    },
+
     async getInstitute(id) {
         return this.apiCall(`/api/institutes/${id}`);
     },
@@ -401,6 +461,11 @@ export const ApiService = {
     // Activities API
     async getActivities() {
         return this.apiCall('/api/activities');
+    },
+
+    // Admin Activities API (with ID field)
+    async getAdminActivities() {
+        return this.apiCall('/api/admin/activities');
     },
 
     async getActivity(id) {
