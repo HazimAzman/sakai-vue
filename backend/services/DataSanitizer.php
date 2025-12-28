@@ -14,6 +14,7 @@ class DataSanitizer
         }
 
         return [
+            'id' => $product->id ?? null,
             'name' => $product->name ?? '',
             'description' => $product->description ?? '',
             'category' => $product->category ?? '',

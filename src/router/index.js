@@ -19,6 +19,72 @@ const router = createRouter({
             component: () => import('@/views/pages/Admin.vue'),
             meta: { requiresAuth: true }
         },
+        // Brand redirects (legacy names)
+        {
+            path: '/products/baxvision',
+            redirect: '/products/raxvision'
+        },
+        {
+            path: '/products/baxvision/:line',
+            redirect: to => `/products/raxvision/${to.params.line}`
+        },
+        // Brand page (must come before generic id route)
+        {
+            path: '/products/:brand',
+            name: 'brand-page',
+            component: () => import('@/views/pages/BrandPage.vue')
+        },
+        // Optional legacy routes kept but not used for brand pages
+        {
+            path: '/products',
+            name: 'products',
+            component: () => import('@/views/pages/Products.vue')
+        },
+        {
+            path: '/products/:id',
+            name: 'product-detail',
+            component: () => import('@/views/pages/Products.vue')
+        },
+        {
+            path: '/products/hettich/eba200-200s',
+            name: 'product-hettich-eba200-200s',
+            component: () => import('@/views/pages/products/HettichEba200.vue')
+        },
+        {
+            path: '/products/hettich/universal320-320r',
+            name: 'product-hettich-universal320-320r',
+            component: () => import('@/views/pages/products/HettichUniversal320.vue')
+        },
+        {
+            path: '/products/hettich/rotofix32a',
+            name: 'product-hettich-rotofix32a',
+            component: () => import('@/views/pages/products/HettichRotofix32a.vue')
+        },
+        {
+            path: '/products/hettich/mikro200-200r',
+            name: 'product-hettich-mikro200-200r',
+            component: () => import('@/views/pages/products/HettichMikro200.vue')
+        },
+        {
+            path: '/products/hettich/rotina380-380r',
+            name: 'product-hettich-rotina380-380r',
+            component: () => import('@/views/pages/products/HettichRotina380.vue')
+        },
+        {
+            path: '/products/scilab/wisebath',
+            name: 'product-scilab-wisebath',
+            component: () => import('@/views/pages/products/ScilabWisebath.vue')
+        },
+        {
+            path: '/products/thermofisher/genesys150',
+            name: 'product-thermofisher-genesys150',
+            component: () => import('@/views/pages/products/ThermoFisherGenesys150.vue')
+        },
+        {
+            path: '/products/raxvision/bi400',
+            name: 'product-raxvision-bi400',
+            component: () => import('@/views/pages/products/BaxVisionBi400.vue')
+        },
   
         {
             path: '/privacy-policy',
@@ -91,7 +157,7 @@ router.beforeEach(async (to, _from, next) => {
             }
 
             // Validate token with backend (check if still exists in database)
-            const response = await fetch('https://aztecsb.com/backend/web/api/auth/profile', {
+            const response = await fetch('/api/auth/profile', {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`,

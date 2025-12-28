@@ -141,7 +141,7 @@ const uploadImage = async (file) => {
     
     try {
        
-        const response = await fetch('https://aztecsb.com/backend/web/api/upload/image', {
+        const response = await fetch('/api/upload/image', {
             method: 'POST',
             // Do NOT stringify or spread FormData; send it directly so the browser sets multipart/form-data with boundary
             headers: (() => {

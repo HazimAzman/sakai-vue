@@ -24,10 +24,10 @@ class SeedProductsCommand extends Controller
                 'category' => 'Advance Weighing System'
             ],
             [
-                'name' => 'IKA',
-                'description' => 'Liquid Handling Instrument',
-                'image_path' => '/images/product/ika-150.png',
-                'category' => 'Liquid Handling Instrument'
+                'name' => 'Hettich LAB TECHNOLOGY',
+                'description' => 'Centrifuge, Pipette & Incubator',
+                'image_path' => '/images/product/hettich-150.png',
+                'category' => 'Centrifuge, Pipette & Incubator'
             ],
             [
                 'name' => 'OPTIKA ITALY',
@@ -149,7 +149,7 @@ class SeedProductsCommand extends Controller
                 'category' => 'Surface Tension Instrument'
             ],
             [
-                'name' => 'BaxVision',
+                'name' => 'RAXVISION',
                 'description' => 'Microscope & Inspection System',
                 'image_path' => '/images/product/raxvision-150.png',
                 'category' => 'Microscope & Inspection System'
@@ -178,12 +178,6 @@ class SeedProductsCommand extends Controller
                 'description' => 'Force & Speed Measuring Instrument',
                 'image_path' => '/images/product/shimpo-150.png',
                 'category' => 'Force & Speed Measuring Instrument'
-            ],
-            [
-                'name' => 'Hettich LAB TECHNOLOGY',
-                'description' => 'Centrifuge, Pipette & Incubator',
-                'image_path' => '/images/product/hettich-150.png',
-                'category' => 'Centrifuge, Pipette & Incubator'
             ],
             // Row 8
             [

@@ -1,7 +1,7 @@
 // API Service for communicating with Yii2 backend
 // Prefer Vite env base URL when available; default to relative '/api' via dev proxy
 const ENV_BASE = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE_URL) ? String(import.meta.env.VITE_API_BASE_URL).replace(/\/$/, '') : '';
-const API_BASE_URL = 'https://aztecsb.com/backend/web' || '';
+const API_BASE_URL = ENV_BASE || '';
 
 
 
@@ -119,7 +119,7 @@ export const ApiService = {
     // Admin Products API (with ID field)
     async getAdminProducts() {
         const token = localStorage.getItem('authToken');
-        return this.apiCall('/api/admin/products', {
+        return this.apiCall('/api/products', {
             headers: {
                 'Authorization': `Bearer ${token}`,
             }
@@ -170,7 +170,7 @@ export const ApiService = {
     // Admin Services API (with ID field)
     async getAdminServices() {
         const token = localStorage.getItem('authToken');
-        return this.apiCall('/api/admin/services', {
+        return this.apiCall('/api/services', {
             headers: {
                 'Authorization': `Bearer ${token}`,
             }
@@ -221,7 +221,7 @@ export const ApiService = {
     // Admin About API (with ID field)
     async getAdminAbout() {
         const token = localStorage.getItem('authToken');
-        return this.apiCall('/api/admin/about', {
+        return this.apiCall('/api/about', {
             headers: {
                 'Authorization': `Bearer ${token}`,
             }
@@ -272,7 +272,7 @@ export const ApiService = {
     // Admin Downloads API (with ID field)
     async getAdminDownloads() {
         const token = localStorage.getItem('authToken');
-        return this.apiCall('/api/admin/downloads', {
+        return this.apiCall('/api/downloads', {
             headers: {
                 'Authorization': `Bearer ${token}`,
             }
@@ -323,7 +323,7 @@ export const ApiService = {
     // Admin Clients API (with ID field)
     async getAdminClients() {
         const token = localStorage.getItem('authToken');
-        return this.apiCall('/api/admin/clients', {
+        return this.apiCall('/api/clients', {
             headers: {
                 'Authorization': `Bearer ${token}`,
             }
@@ -373,7 +373,7 @@ export const ApiService = {
 
     // Admin Contacts API (with ID field)
     async getAdminContacts() {
-        return this.apiCall('/api/admin/contacts');
+        return this.apiCall('/api/contacts');
     },
 
     async getContact(id) {
@@ -419,7 +419,7 @@ export const ApiService = {
 
     // Admin Institutes API (with ID field)
     async getAdminInstitutes() {
-        return this.apiCall('/api/admin/institutes');
+        return this.apiCall('/api/institutes');
     },
 
     async getInstitute(id) {
@@ -465,7 +465,7 @@ export const ApiService = {
 
     // Admin Activities API (with ID field)
     async getAdminActivities() {
-        return this.apiCall('/api/admin/activities');
+        return this.apiCall('/api/activities');
     },
 
     async getActivity(id) {

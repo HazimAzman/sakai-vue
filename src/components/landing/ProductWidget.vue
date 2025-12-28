@@ -18,11 +18,29 @@
 
         <!-- Product Brand Logos Grid -->
         <div v-else class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4">
-            <div 
-                v-for="(product, index) in products" 
-                :key="`product-${index}`"
-                class="bg-white dark:bg-surface-800 rounded-lg shadow-md p-4 text-center hover:shadow-lg transition-shadow duration-300"
+            <template v-for="(product, index) in products" :key="`product-${index}`">
+            <RouterLink
+                v-if="computeTo(product)"
+                :to="computeTo(product)"
+                class="group relative block rounded-lg overflow-hidden"
             >
+                <div class="bg-white dark:bg-surface-800 rounded-lg shadow-md p-4 text-center transition-all duration-300 group-hover:shadow-xl group-hover:bg-primary-50 dark:group-hover:bg-surface-700">
+                    <img 
+                        :src="product.image_url" 
+                        :alt="product.name" 
+                        class="h-16 mx-auto mb-4 object-contain transition-transform duration-300 group-hover:scale-105"
+                        @error="handleImageError"
+                    />
+                    <div class="text-sm font-semibold text-surface-900 dark:text-surface-0">{{ product.name }}</div>
+                    <div class="text-xs text-surface-600 dark:text-surface-400 mt-1">{{ product.category }}</div>
+
+                    <!-- Hover overlay CTA -->
+                    <div class="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/30 transition-colors duration-300">
+                        <span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-white text-sm font-semibold px-3 py-1 rounded-full bg-primary-500/90">Visit product page</span>
+                    </div>
+                </div>
+            </RouterLink>
+            <div v-else class="bg-white dark:bg-surface-800 rounded-lg shadow-md p-4 text-center opacity-80">
                 <img 
                     :src="product.image_url" 
                     :alt="product.name" 
@@ -32,6 +50,7 @@
                 <div class="text-sm font-semibold text-surface-900 dark:text-surface-0">{{ product.name }}</div>
                 <div class="text-xs text-surface-600 dark:text-surface-400 mt-1">{{ product.category }}</div>
             </div>
+            </template>
         </div>
 
 
@@ -64,6 +83,7 @@
 <script setup>
 import { ApiService } from '@/service/ApiService.js';
 import { onMounted, ref } from 'vue';
+import { brands, normalizeBrand } from '@/assets/productLines.js';
 
 const products = ref([]);
 const loading = ref(true);
@@ -101,4 +121,28 @@ const handleImageError = (event) => {
 onMounted(() => {
     loadProducts();
 });
+
+// Determine where to route when clicking a product brand card
+const computeTo = (product) => {
+    const name = String(product?.name || '');
+    let slug = normalizeBrand(name);
+    
+    // Brand name mappings (handle legacy names)
+    const brandMappings = {
+        'baxvision': 'raxvision'
+    };
+    if (brandMappings[slug]) {
+        slug = brandMappings[slug];
+    }
+    
+    // Known brand slugs that should route to brand page
+    const knownBrands = ['hettich', 'hettich-lab-technology', 'scilab', 'thermofisher', 'thermofisher-scientific', 'raxvision'];
+    
+    if (brands[slug] || knownBrands.includes(slug)) {
+        // Go to brand page that lists only that brand's lines
+        return `/products/${slug}`;
+    }
+    // Fallback: if API has an id, go to generic product detail
+    return product?.id ? `/products/${product.id}` : null;
+};
 </script>

@@ -78,6 +78,9 @@ $config = [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
+                // Birthday page
+                'birthday' => 'birthday/index',
+                
                 // API Health and Info
                 'api' => 'api/index',
                 'api/health' => 'api/health',

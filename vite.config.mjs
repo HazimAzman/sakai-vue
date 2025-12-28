@@ -24,7 +24,7 @@ export default defineConfig({
     server: {
         proxy: {
           '/api': {
-            target: 'https://aztecsb.com/backend/web',
+            target: 'http://localhost/sakai-vue/backend/web',
             changeOrigin: true,
             rewrite: (path) => path.replace(/^\/api/, '/api')
           }

@@ -34,7 +34,9 @@ const validateForm = () => {
 };
 
 // Determine API base URL: prefer Vite env, fallback to relative /api
-const API_BASE_URL = 'https://aztecsb.com/backend/web';
+const API_BASE_URL = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE_URL)
+  ? String(import.meta.env.VITE_API_BASE_URL).replace(/\/$/, '')
+  : '';
 
 const handleLogin = async () => {
   if (!validateForm()) return;

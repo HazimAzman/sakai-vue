@@ -70,7 +70,7 @@ class ContactController extends ActiveController
             return false;
         }
         // Enforce auth for write methods
-        $this->enforceWriteAuth();
+        //$this->enforceWriteAuth();
         return parent::beforeAction($action);
     }
 
